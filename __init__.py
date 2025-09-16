@@ -14,9 +14,14 @@ import logging
 try:
     from auto_installer import auto_install_dependencies, ensure_dependencies
     AUTO_INSTALLER_AVAILABLE = True
+    print(f"{Colors.GREEN}✅ Auto-installer imported successfully{Colors.END}")
 except ImportError as e:
     AUTO_INSTALLER_AVAILABLE = False
-    print(f"Warning: Auto-installer not available: {e}")
+    print(f"{Colors.YELLOW}⚠️ Auto-installer not available: {e}{Colors.END}")
+    print(f"{Colors.CYAN}   This is normal if auto_installer.py is missing{Colors.END}")
+except Exception as e:
+    AUTO_INSTALLER_AVAILABLE = False
+    print(f"{Colors.RED}❌ Error importing auto-installer: {e}{Colors.END}")
 
 # Set up logging with console output
 logging.basicConfig(
@@ -49,13 +54,36 @@ print(f"{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
 # Define the path to the current directory and subdirectories
 comfyui_texttools_path = os.path.dirname(os.path.realpath(__file__))
 nodes_path = os.path.join(comfyui_texttools_path, "nodes")
+utils_path = os.path.join(comfyui_texttools_path, "utils")
 
 print(f"{Colors.CYAN}Extension directory: {Colors.WHITE}{comfyui_texttools_path}{Colors.END}")
 print(f"{Colors.CYAN}Nodes directory: {Colors.WHITE}{nodes_path}{Colors.END}")
+print(f"{Colors.CYAN}Utils directory: {Colors.WHITE}{utils_path}{Colors.END}")
 
-# Ensure the nodes path is added to sys.path for importing custom nodes
-sys.path.append(nodes_path)
-print(f"{Colors.CYAN}Added to sys.path: {Colors.WHITE}{nodes_path}{Colors.END}")
+# Check if directories exist
+if os.path.exists(nodes_path):
+    print(f"{Colors.GREEN}✅ Nodes directory exists{Colors.END}")
+else:
+    print(f"{Colors.RED}❌ Nodes directory does not exist{Colors.END}")
+
+if os.path.exists(utils_path):
+    print(f"{Colors.GREEN}✅ Utils directory exists{Colors.END}")
+else:
+    print(f"{Colors.RED}❌ Utils directory does not exist{Colors.END}")
+
+# Ensure the paths are added to sys.path for importing custom nodes
+if nodes_path not in sys.path:
+    sys.path.append(nodes_path)
+    print(f"{Colors.CYAN}Added nodes to sys.path: {Colors.WHITE}{nodes_path}{Colors.END}")
+
+if utils_path not in sys.path:
+    sys.path.append(utils_path)
+    print(f"{Colors.CYAN}Added utils to sys.path: {Colors.WHITE}{utils_path}{Colors.END}")
+
+# Also add the main extension directory to sys.path
+if comfyui_texttools_path not in sys.path:
+    sys.path.append(comfyui_texttools_path)
+    print(f"{Colors.CYAN}Added extension to sys.path: {Colors.WHITE}{comfyui_texttools_path}{Colors.END}")
 
 # Automatic dependency installation
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Automatic Dependency Installation ---{Colors.END}")
@@ -110,6 +138,56 @@ def ensure_dependencies_for_nodes():
         except ImportError:
             return False
 
+# Function to import node modules with multiple fallback methods
+def import_node_module(module_name, class_name, nodes_path):
+    """Import a node module using multiple fallback methods"""
+    print(f"{Colors.CYAN}Attempting to import {module_name}...{Colors.END}")
+    
+    # Method 1: Try importing as module from nodes package
+    try:
+        import importlib
+        module = importlib.import_module(f"nodes.{module_name}")
+        node_class = getattr(module, class_name)
+        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 1){Colors.END}")
+        return node_class
+    except (ImportError, AttributeError) as e1:
+        print(f"{Colors.YELLOW}Method 1 failed: {e1}{Colors.END}")
+    
+    # Method 2: Try importing directly from file
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(module_name, os.path.join(nodes_path, f"{module_name}.py"))
+        if spec is None:
+            raise ImportError(f"Could not load spec for {module_name}")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        node_class = getattr(module, class_name)
+        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 2){Colors.END}")
+        return node_class
+    except (ImportError, AttributeError, FileNotFoundError) as e2:
+        print(f"{Colors.YELLOW}Method 2 failed: {e2}{Colors.END}")
+    
+    # Method 3: Try importing with exec
+    try:
+        import importlib.util
+        file_path = os.path.join(nodes_path, f"{module_name}.py")
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+        
+        with open(file_path, 'r', encoding='utf-8') as f:
+            code = f.read()
+        
+        # Create a new module
+        module = importlib.util.module_from_spec(importlib.util.spec_from_loader(module_name, loader=None))
+        exec(code, module.__dict__)
+        
+        node_class = getattr(module, class_name)
+        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 3){Colors.END}")
+        return node_class
+    except Exception as e3:
+        print(f"{Colors.RED}All import methods failed for {class_name}: {e3}{Colors.END}")
+        raise e3
+
 # Importing custom nodes
 APZmediaPSDLayerSaver = None
 APZmediaPSDLayerSaverAdvanced = None
@@ -120,10 +198,7 @@ print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver ---{Co
 try:
     # Ensure dependencies are available before importing
     if ensure_dependencies_for_nodes():
-        # Import directly from file to avoid package conflicts
-        import nodes.apzPSDLayerSaver as psd_saver_module
-        APZmediaPSDLayerSaver = psd_saver_module.APZmediaPSDLayerSaver
-        print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver node{Colors.END}")
+        APZmediaPSDLayerSaver = import_node_module("apzPSDLayerSaver", "APZmediaPSDLayerSaver", nodes_path)
         logger.info("Successfully imported APZmediaPSDLayerSaver node.")
     else:
         print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver node{Colors.END}")
@@ -136,10 +211,7 @@ print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaverAdvance
 try:
     # Ensure dependencies are available before importing
     if ensure_dependencies_for_nodes():
-        # Import directly from file to avoid package conflicts
-        import nodes.apzPSDLayerSaver as psd_saver_module
-        APZmediaPSDLayerSaverAdvanced = psd_saver_module.APZmediaPSDLayerSaverAdvanced
-        print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaverAdvanced node{Colors.END}")
+        APZmediaPSDLayerSaverAdvanced = import_node_module("apzPSDLayerSaver", "APZmediaPSDLayerSaverAdvanced", nodes_path)
         logger.info("Successfully imported APZmediaPSDLayerSaverAdvanced node.")
     else:
         print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaverAdvanced node{Colors.END}")
@@ -152,10 +224,7 @@ print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8Layers
 try:
     # Ensure dependencies are available before importing
     if ensure_dependencies_for_nodes():
-        # Import directly from file to avoid package conflicts
-        import nodes.apzPSDLayerSaver8Layers as psd_8layers_module
-        APZmediaPSDLayerSaver8Layers = psd_8layers_module.APZmediaPSDLayerSaver8Layers
-        print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver8Layers node{Colors.END}")
+        APZmediaPSDLayerSaver8Layers = import_node_module("apzPSDLayerSaver8Layers", "APZmediaPSDLayerSaver8Layers", nodes_path)
         logger.info("Successfully imported APZmediaPSDLayerSaver8Layers node.")
     else:
         print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver8Layers node{Colors.END}")
@@ -168,10 +237,7 @@ print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8Layers
 try:
     # Ensure dependencies are available before importing
     if ensure_dependencies_for_nodes():
-        # Import directly from file to avoid package conflicts
-        import nodes.apzPSDLayerSaver8Layers as psd_8layers_module
-        APZmediaPSDLayerSaver8LayersAdvanced = psd_8layers_module.APZmediaPSDLayerSaver8LayersAdvanced
-        print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node{Colors.END}")
+        APZmediaPSDLayerSaver8LayersAdvanced = import_node_module("apzPSDLayerSaver8Layers", "APZmediaPSDLayerSaver8LayersAdvanced", nodes_path)
         logger.info("Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node.")
     else:
         print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver8LayersAdvanced node{Colors.END}")
@@ -183,11 +249,42 @@ except Exception as e:
 # Utilities should be imported as needed, but not registered as nodes
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing PSD Utilities ---{Colors.END}")
 try:
-    # Import utilities directly from files to avoid conflicts with ComfyUI's utils
-    import utils.apz_psd_conversion as apz_psd_conversion
-    import utils.apz_psd_mask_utility as apz_psd_mask_utility
-    import utils.apz_image_conversion as apz_image_conversion
-    print(f"{Colors.GREEN}✅ Successfully imported PSD utility modules{Colors.END}")
+    # Try importing utilities with fallback methods
+    print(f"{Colors.CYAN}Attempting to import PSD utility modules...{Colors.END}")
+    
+    # Method 1: Try importing as modules
+    try:
+        import utils.apz_psd_conversion as apz_psd_conversion
+        import utils.apz_psd_mask_utility as apz_psd_mask_utility
+        import utils.apz_image_conversion as apz_image_conversion
+        print(f"{Colors.GREEN}✅ Successfully imported PSD utility modules (method 1){Colors.END}")
+    except ImportError as e1:
+        print(f"{Colors.YELLOW}Method 1 failed: {e1}{Colors.END}")
+        
+        # Method 2: Try importing directly from files
+        try:
+            import importlib.util
+            
+            # Import apz_psd_conversion
+            spec1 = importlib.util.spec_from_file_location("apz_psd_conversion", os.path.join(utils_path, "apz_psd_conversion.py"))
+            apz_psd_conversion = importlib.util.module_from_spec(spec1)
+            spec1.loader.exec_module(apz_psd_conversion)
+            
+            # Import apz_psd_mask_utility
+            spec2 = importlib.util.spec_from_file_location("apz_psd_mask_utility", os.path.join(utils_path, "apz_psd_mask_utility.py"))
+            apz_psd_mask_utility = importlib.util.module_from_spec(spec2)
+            spec2.loader.exec_module(apz_psd_mask_utility)
+            
+            # Import apz_image_conversion
+            spec3 = importlib.util.spec_from_file_location("apz_image_conversion", os.path.join(utils_path, "apz_image_conversion.py"))
+            apz_image_conversion = importlib.util.module_from_spec(spec3)
+            spec3.loader.exec_module(apz_image_conversion)
+            
+            print(f"{Colors.GREEN}✅ Successfully imported PSD utility modules (method 2){Colors.END}")
+        except Exception as e2:
+            print(f"{Colors.YELLOW}Method 2 failed: {e2}{Colors.END}")
+            print(f"{Colors.YELLOW}⚠️ PSD utility modules not available, but nodes may still work{Colors.END}")
+    
     logger.info("Successfully imported PSD utility modules.")
 except Exception as e:
     print(f"{Colors.RED}❌ Failed to import PSD utility modules: {e}{Colors.END}")
