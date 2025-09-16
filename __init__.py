@@ -10,6 +10,19 @@ import sys
 import traceback
 import logging
 
+# Color codes for console output
+class Colors:
+    ORANGE = '\033[38;5;208m'  # Bright orange
+    GREEN = '\033[92m'         # Green
+    RED = '\033[91m'           # Red
+    YELLOW = '\033[93m'        # Yellow
+    BLUE = '\033[94m'          # Blue
+    PURPLE = '\033[95m'        # Purple
+    CYAN = '\033[96m'          # Cyan
+    WHITE = '\033[97m'         # White
+    BOLD = '\033[1m'           # Bold
+    END = '\033[0m'            # End color
+
 # Import automatic dependency installer
 try:
     from auto_installer import auto_install_dependencies, ensure_dependencies
@@ -32,19 +45,6 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-
-# Color codes for console output
-class Colors:
-    ORANGE = '\033[38;5;208m'  # Bright orange
-    GREEN = '\033[92m'         # Green
-    RED = '\033[91m'           # Red
-    YELLOW = '\033[93m'        # Yellow
-    BLUE = '\033[94m'          # Blue
-    PURPLE = '\033[95m'        # Purple
-    CYAN = '\033[96m'          # Cyan
-    WHITE = '\033[97m'         # White
-    BOLD = '\033[1m'           # Bold
-    END = '\033[0m'            # End color
 
 # Add colorful console print statements for immediate visibility
 print(f"{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
@@ -143,33 +143,37 @@ def import_node_module(module_name, class_name, nodes_path):
     """Import a node module using multiple fallback methods"""
     print(f"{Colors.CYAN}Attempting to import {module_name}...{Colors.END}")
     
-    # Method 1: Try importing as module from nodes package
+    # Method 1: Try importing directly from file (most reliable)
+    try:
+        import importlib.util
+        file_path = os.path.join(nodes_path, f"{module_name}.py")
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+        
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        if spec is None:
+            raise ImportError(f"Could not load spec for {module_name}")
+        
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        node_class = getattr(module, class_name)
+        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 1){Colors.END}")
+        return node_class
+    except (ImportError, AttributeError, FileNotFoundError) as e1:
+        print(f"{Colors.YELLOW}Method 1 failed: {e1}{Colors.END}")
+    
+    # Method 2: Try importing as module from nodes package
     try:
         import importlib
         module = importlib.import_module(f"nodes.{module_name}")
         node_class = getattr(module, class_name)
-        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 1){Colors.END}")
-        return node_class
-    except (ImportError, AttributeError) as e1:
-        print(f"{Colors.YELLOW}Method 1 failed: {e1}{Colors.END}")
-    
-    # Method 2: Try importing directly from file
-    try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(module_name, os.path.join(nodes_path, f"{module_name}.py"))
-        if spec is None:
-            raise ImportError(f"Could not load spec for {module_name}")
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        node_class = getattr(module, class_name)
         print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 2){Colors.END}")
         return node_class
-    except (ImportError, AttributeError, FileNotFoundError) as e2:
+    except (ImportError, AttributeError) as e2:
         print(f"{Colors.YELLOW}Method 2 failed: {e2}{Colors.END}")
     
-    # Method 3: Try importing with exec
+    # Method 3: Try importing with exec (last resort)
     try:
-        import importlib.util
         file_path = os.path.join(nodes_path, f"{module_name}.py")
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"File not found: {file_path}")
