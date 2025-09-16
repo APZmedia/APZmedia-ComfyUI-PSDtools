@@ -7,7 +7,16 @@ This node saves multiple images as layers in a PSD file, with optional masks for
 import torch
 import os
 from typing import List, Optional, Tuple
-# Import utilities with fallback methods
+# ComfyUI-compatible import pattern
+import sys
+import os
+
+# Add extension root to Python path (ComfyUI standard pattern)
+extension_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if extension_root not in sys.path:
+    sys.path.insert(0, extension_root)
+
+# Now import utilities using absolute paths from extension root
 try:
     from utils.apz_psd_conversion import (
         tensor_to_numpy_array,
@@ -18,43 +27,24 @@ try:
         validate_layer_dimensions
     )
     from utils.apz_psd_mask_utility import PSDMaskUtility
-except ImportError:
-    # Fallback: try importing from the extension directory
-    import sys
-    import os
-    extension_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    utils_dir = os.path.join(extension_dir, "utils")
-    if utils_dir not in sys.path:
-        sys.path.append(utils_dir)
-    
-    try:
-        from apz_psd_conversion import (
-            tensor_to_numpy_array,
-            create_psd_layer,
-            create_psd_from_layers,
-            save_psd_file,
-            batch_tensors_to_psd_layers,
-            validate_layer_dimensions
-        )
-        from apz_psd_mask_utility import PSDMaskUtility
-    except ImportError as e:
-        print(f"Warning: Could not import PSD utilities: {e}")
-        # Create dummy functions to prevent errors
-        def tensor_to_numpy_array(*args, **kwargs):
+except ImportError as e:
+    print(f"Warning: Could not import PSD utilities: {e}")
+    # Create dummy functions to prevent errors
+    def tensor_to_numpy_array(*args, **kwargs):
+        raise ImportError("PSD utilities not available")
+    def create_psd_layer(*args, **kwargs):
+        raise ImportError("PSD utilities not available")
+    def create_psd_from_layers(*args, **kwargs):
+        raise ImportError("PSD utilities not available")
+    def save_psd_file(*args, **kwargs):
+        raise ImportError("PSD utilities not available")
+    def batch_tensors_to_psd_layers(*args, **kwargs):
+        raise ImportError("PSD utilities not available")
+    def validate_layer_dimensions(*args, **kwargs):
+        raise ImportError("PSD utilities not available")
+    class PSDMaskUtility:
+        def __init__(self, *args, **kwargs):
             raise ImportError("PSD utilities not available")
-        def create_psd_layer(*args, **kwargs):
-            raise ImportError("PSD utilities not available")
-        def create_psd_from_layers(*args, **kwargs):
-            raise ImportError("PSD utilities not available")
-        def save_psd_file(*args, **kwargs):
-            raise ImportError("PSD utilities not available")
-        def batch_tensors_to_psd_layers(*args, **kwargs):
-            raise ImportError("PSD utilities not available")
-        def validate_layer_dimensions(*args, **kwargs):
-            raise ImportError("PSD utilities not available")
-        class PSDMaskUtility:
-            def __init__(self, *args, **kwargs):
-                raise ImportError("PSD utilities not available")
 
 
 class APZmediaPSDLayerSaver:
