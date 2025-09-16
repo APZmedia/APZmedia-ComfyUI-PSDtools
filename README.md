@@ -30,12 +30,48 @@ ComfyUI-APZmedia-PSDtools includes custom nodes for:
 
 ## Installation
 
-1. Clone or download this repository to your ComfyUI custom nodes directory
-2. Install the required dependencies:
+### Automatic Installation (Recommended)
+
+1. **Install via pip** (dependencies will be installed automatically):
    ```bash
-   pip install pytoshop>=0.1.0 Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
+   pip install -e .
    ```
-3. Restart ComfyUI
+
+2. **Or use the installation script:**
+   ```bash
+   python install_dependencies.py
+   ```
+
+3. **Or copy to ComfyUI custom nodes directory:**
+   - Copy this repository to `ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/`
+   - Run `pip install -e .` from the extension directory to install dependencies
+   - Restart ComfyUI
+
+### Manual Installation (if automatic fails)
+
+If the automatic dependency installation doesn't work, you can install dependencies manually:
+
+**Standard installation:**
+```bash
+pip install pytoshop>=0.1.0 Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
+```
+
+**If you encounter permission issues, use the --user flag:**
+```bash
+pip install --user pytoshop>=0.1.0 Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
+```
+
+### Verify Installation
+
+After installation, you should see the PSD nodes in the `image/psd` category:
+- APZmedia PSD Layer Saver
+- APZmedia PSD Layer Saver Advanced  
+- APZmedia PSD Layer Saver (8 Layers)
+- APZmedia PSD Layer Saver (8 Layers Advanced)
+
+### Troubleshooting
+
+If nodes don't appear, check the ComfyUI console for error messages. See [INSTALL.md](INSTALL.md) for detailed troubleshooting.
 
 ## Node Reference
 

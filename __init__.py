@@ -22,6 +22,11 @@ nodes_path = os.path.join(comfyui_texttools_path, "nodes")
 sys.path.append(nodes_path)
 
 # Importing custom nodes
+APZmediaPSDLayerSaver = None
+APZmediaPSDLayerSaverAdvanced = None
+APZmediaPSDLayerSaver8Layers = None
+APZmediaPSDLayerSaver8LayersAdvanced = None
+
 try:
     from .nodes.apzPSDLayerSaver import APZmediaPSDLayerSaver
     logger.info("Successfully imported APZmediaPSDLayerSaver node.")
@@ -55,19 +60,25 @@ try:
 except Exception as e:
     logger.error("Failed to import PSD utility modules.", exc_info=True)
 
-NODE_CLASS_MAPPINGS = {
-    "APZmediaPSDLayerSaver": APZmediaPSDLayerSaver,
-    "APZmediaPSDLayerSaverAdvanced": APZmediaPSDLayerSaverAdvanced,
-    "APZmediaPSDLayerSaver8Layers": APZmediaPSDLayerSaver8Layers,
-    "APZmediaPSDLayerSaver8LayersAdvanced": APZmediaPSDLayerSaver8LayersAdvanced,
-}
+# Build node mappings only for successfully imported nodes
+NODE_CLASS_MAPPINGS = {}
+NODE_DISPLAY_NAME_MAPPINGS = {}
 
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "APZmediaPSDLayerSaver": "APZmedia PSD Layer Saver",
-    "APZmediaPSDLayerSaverAdvanced": "APZmedia PSD Layer Saver Advanced",
-    "APZmediaPSDLayerSaver8Layers": "APZmedia PSD Layer Saver (8 Layers)",
-    "APZmediaPSDLayerSaver8LayersAdvanced": "APZmedia PSD Layer Saver (8 Layers Advanced)",
-}
+if APZmediaPSDLayerSaver is not None:
+    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = APZmediaPSDLayerSaver
+    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver"] = "APZmedia PSD Layer Saver"
+
+if APZmediaPSDLayerSaverAdvanced is not None:
+    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = APZmediaPSDLayerSaverAdvanced
+    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = "APZmedia PSD Layer Saver Advanced"
+
+if APZmediaPSDLayerSaver8Layers is not None:
+    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = APZmediaPSDLayerSaver8Layers
+    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = "APZmedia PSD Layer Saver (8 Layers)"
+
+if APZmediaPSDLayerSaver8LayersAdvanced is not None:
+    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = APZmediaPSDLayerSaver8LayersAdvanced
+    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = "APZmedia PSD Layer Saver (8 Layers Advanced)"
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
 
