@@ -28,34 +28,34 @@ APZmediaPSDLayerSaver8Layers = None
 APZmediaPSDLayerSaver8LayersAdvanced = None
 
 try:
-    from .nodes.apzPSDLayerSaver import APZmediaPSDLayerSaver
+    from nodes.apzPSDLayerSaver import APZmediaPSDLayerSaver
     logger.info("Successfully imported APZmediaPSDLayerSaver node.")
 except Exception as e:
     logger.error("Failed to import APZmediaPSDLayerSaver node.", exc_info=True)
 
 try:
-    from .nodes.apzPSDLayerSaver import APZmediaPSDLayerSaverAdvanced
+    from nodes.apzPSDLayerSaver import APZmediaPSDLayerSaverAdvanced
     logger.info("Successfully imported APZmediaPSDLayerSaverAdvanced node.")
 except Exception as e:
     logger.error("Failed to import APZmediaPSDLayerSaverAdvanced node.", exc_info=True)
 
 try:
-    from .nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8Layers
+    from nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8Layers
     logger.info("Successfully imported APZmediaPSDLayerSaver8Layers node.")
 except Exception as e:
     logger.error("Failed to import APZmediaPSDLayerSaver8Layers node.", exc_info=True)
 
 try:
-    from .nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8LayersAdvanced
+    from nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8LayersAdvanced
     logger.info("Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node.")
 except Exception as e:
     logger.error("Failed to import APZmediaPSDLayerSaver8LayersAdvanced node.", exc_info=True)
 
 # Utilities should be imported as needed, but not registered as nodes
 try:
-    from .utils import apz_psd_conversion
-    from .utils import apz_psd_mask_utility
-    from .utils import apz_image_conversion
+    from utils import apz_psd_conversion
+    from utils import apz_psd_mask_utility
+    from utils import apz_image_conversion
     logger.info("Successfully imported PSD utility modules.")
 except Exception as e:
     logger.error("Failed to import PSD utility modules.", exc_info=True)
@@ -85,3 +85,5 @@ __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
 # Additional setup, such as threading or other initializations, can be added here if necessary
 
 logger.info("ComfyUI PSD Tools extension has been loaded successfully.")
+logger.info(f"Registered {len(NODE_CLASS_MAPPINGS)} nodes: {list(NODE_CLASS_MAPPINGS.keys())}")
+logger.info(f"Node display names: {list(NODE_DISPLAY_NAME_MAPPINGS.keys())}")

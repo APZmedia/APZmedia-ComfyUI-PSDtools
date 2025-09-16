@@ -7,7 +7,7 @@ This node saves multiple images as layers in a PSD file, with optional masks for
 import torch
 import os
 from typing import List, Optional, Tuple
-from ..utils.apz_psd_conversion import (
+from utils.apz_psd_conversion import (
     tensor_to_numpy_array,
     create_psd_layer,
     create_psd_from_layers,
@@ -15,7 +15,7 @@ from ..utils.apz_psd_conversion import (
     batch_tensors_to_psd_layers,
     validate_layer_dimensions
 )
-from ..utils.apz_psd_mask_utility import PSDMaskUtility
+from utils.apz_psd_mask_utility import PSDMaskUtility
 
 
 class APZmediaPSDLayerSaver:

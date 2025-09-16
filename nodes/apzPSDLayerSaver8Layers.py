@@ -7,14 +7,14 @@ This node saves exactly 8 images as layers in a PSD file, with individual masks 
 import torch
 import os
 from typing import List, Optional, Tuple
-from ..utils.apz_psd_conversion import (
+from utils.apz_psd_conversion import (
     tensor_to_numpy_array,
     create_psd_layer,
     create_psd_from_layers,
     save_psd_file,
     validate_layer_dimensions
 )
-from ..utils.apz_psd_mask_utility import PSDMaskUtility
+from utils.apz_psd_mask_utility import PSDMaskUtility
 
 
 class APZmediaPSDLayerSaver8Layers:
