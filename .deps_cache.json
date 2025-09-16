@@ -1,0 +1,22 @@
+{
+  "pytoshop": {
+    "installed": true,
+    "timestamp": 1758064995.9080653
+  },
+  "psd-tools": {
+    "installed": true,
+    "timestamp": 1758064996.6505153
+  },
+  "Pillow": {
+    "installed": true,
+    "timestamp": 1758064997.4226642
+  },
+  "torch": {
+    "installed": true,
+    "timestamp": 1758064999.1536791
+  },
+  "numpy": {
+    "installed": true,
+    "timestamp": 1758064999.1618104
+  }
+}
