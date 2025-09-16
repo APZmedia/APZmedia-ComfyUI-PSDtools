@@ -8,6 +8,8 @@ ComfyUI-APZmedia-PSDtools includes custom nodes for:
 
 - **APZmedia PSD Layer Saver**: A node for saving multiple images as layers in a PSD file with optional masks
 - **APZmedia PSD Layer Saver Advanced**: An enhanced version with background layer support and advanced layer options
+- **APZmedia PSD Layer Saver (8 Layers)**: A specialized node for exactly 8 layers with individual inputs for each layer
+- **APZmedia PSD Layer Saver (8 Layers Advanced)**: Advanced version of the 8-layer node with offset support
 
 ## Features
 
@@ -77,6 +79,50 @@ ComfyUI-APZmedia-PSDtools includes custom nodes for:
 - **success** (BOOLEAN): Whether the operation was successful
 - **layer_count** (INT): Number of layers created in the PSD file
 
+### APZmedia PSD Layer Saver (8 Layers)
+
+**Category**: `image/psd`
+
+**Inputs**:
+- **image_1** through **image_8** (IMAGE): Individual images for each layer
+- **layer_name_1** through **layer_name_8** (STRING): Individual layer names
+- **psd_filename** (STRING): Name of the PSD file to create
+- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
+- **mask_1** through **mask_8** (MASK, optional): Individual masks for each layer
+- **opacity_1** through **opacity_8** (INT, optional): Individual opacity values (0-255)
+- **blend_mode_1** through **blend_mode_8** (COMBO, optional): Individual blend modes
+- **create_background_layer** (COMBO, optional): Whether to create a background layer (true/false)
+- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
+- **background_opacity** (INT, optional): Opacity for background layer (0-255)
+
+**Outputs**:
+- **output_path** (STRING): Path where the PSD file was saved
+- **success** (BOOLEAN): Whether the operation was successful
+- **layer_count** (INT): Number of layers created in the PSD file
+
+### APZmedia PSD Layer Saver (8 Layers Advanced)
+
+**Category**: `image/psd`
+
+**Inputs**:
+- **image_1** through **image_8** (IMAGE): Individual images for each layer
+- **layer_name_1** through **layer_name_8** (STRING): Individual layer names
+- **psd_filename** (STRING): Name of the PSD file to create
+- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
+- **create_background_layer** (COMBO): Whether to create a background layer (true/false)
+- **mask_1** through **mask_8** (MASK, optional): Individual masks for each layer
+- **opacity_1** through **opacity_8** (INT, optional): Individual opacity values (0-255)
+- **blend_mode_1** through **blend_mode_8** (COMBO, optional): Individual blend modes
+- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
+- **background_opacity** (INT, optional): Opacity for background layer (0-255)
+- **offset_x_1** through **offset_x_8** (INT, optional): Individual X offsets for layers
+- **offset_y_1** through **offset_y_8** (INT, optional): Individual Y offsets for layers
+
+**Outputs**:
+- **output_path** (STRING): Path where the PSD file was saved
+- **success** (BOOLEAN): Whether the operation was successful
+- **layer_count** (INT): Number of layers created in the PSD file
+
 ## Usage Examples
 
 ### Basic Usage
@@ -102,6 +148,26 @@ ComfyUI-APZmedia-PSDtools includes custom nodes for:
    - Blend modes: `normal\nmultiply\noverlay`
 4. **Enable Background**: Set `create_background_layer` to `true`
 5. **Set Background Color**: Use hex color like `#FF0000` for red background
+
+### 8-Layer Node Usage
+
+The 8-layer nodes are perfect when you have exactly 8 images to save as layers:
+
+1. **Load 8 Images**: Use ComfyUI's image loading nodes to load your 8 images
+2. **Connect to 8-Layer Saver**: Connect each image to the corresponding `image_1` through `image_8` inputs
+3. **Set Layer Names**: Enter individual layer names:
+   - `layer_name_1`: "Background"
+   - `layer_name_2`: "Character"
+   - `layer_name_3`: "Hair"
+   - `layer_name_4`: "Clothing"
+   - `layer_name_5`: "Accessories"
+   - `layer_name_6`: "Effects"
+   - `layer_name_7`: "Lighting"
+   - `layer_name_8`: "Overlay"
+4. **Set PSD Filename**: Enter the desired filename (e.g., `character_composition.psd`)
+5. **Add Masks (Optional)**: Connect masks to `mask_1` through `mask_8` if needed
+6. **Configure Properties**: Set individual opacities and blend modes for each layer
+7. **Run**: Execute the workflow to create the PSD file
 
 ### Layer Names Format
 

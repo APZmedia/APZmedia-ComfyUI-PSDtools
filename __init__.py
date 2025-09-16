@@ -34,6 +34,18 @@ try:
 except Exception as e:
     logger.error("Failed to import APZmediaPSDLayerSaverAdvanced node.", exc_info=True)
 
+try:
+    from .nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8Layers
+    logger.info("Successfully imported APZmediaPSDLayerSaver8Layers node.")
+except Exception as e:
+    logger.error("Failed to import APZmediaPSDLayerSaver8Layers node.", exc_info=True)
+
+try:
+    from .nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8LayersAdvanced
+    logger.info("Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node.")
+except Exception as e:
+    logger.error("Failed to import APZmediaPSDLayerSaver8LayersAdvanced node.", exc_info=True)
+
 # Utilities should be imported as needed, but not registered as nodes
 try:
     from .utils import apz_psd_conversion
@@ -46,11 +58,15 @@ except Exception as e:
 NODE_CLASS_MAPPINGS = {
     "APZmediaPSDLayerSaver": APZmediaPSDLayerSaver,
     "APZmediaPSDLayerSaverAdvanced": APZmediaPSDLayerSaverAdvanced,
+    "APZmediaPSDLayerSaver8Layers": APZmediaPSDLayerSaver8Layers,
+    "APZmediaPSDLayerSaver8LayersAdvanced": APZmediaPSDLayerSaver8LayersAdvanced,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "APZmediaPSDLayerSaver": "APZmedia PSD Layer Saver",
     "APZmediaPSDLayerSaverAdvanced": "APZmedia PSD Layer Saver Advanced",
+    "APZmediaPSDLayerSaver8Layers": "APZmedia PSD Layer Saver (8 Layers)",
+    "APZmediaPSDLayerSaver8LayersAdvanced": "APZmedia PSD Layer Saver (8 Layers Advanced)",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']

@@ -53,6 +53,8 @@ try:
             'comfyui.custom_nodes': [
                 'APZmediaPSDLayerSaver = nodes.apzPSDLayerSaver:APZmediaPSDLayerSaver',
                 'APZmediaPSDLayerSaverAdvanced = nodes.apzPSDLayerSaver:APZmediaPSDLayerSaverAdvanced',
+                'APZmediaPSDLayerSaver8Layers = nodes.apzPSDLayerSaver8Layers:APZmediaPSDLayerSaver8Layers',
+                'APZmediaPSDLayerSaver8LayersAdvanced = nodes.apzPSDLayerSaver8Layers:APZmediaPSDLayerSaver8LayersAdvanced',
             ]
         }
     )

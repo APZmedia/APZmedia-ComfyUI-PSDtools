@@ -1,0 +1,504 @@
+"""
+APZmedia PSD Layer Saver 8 Layers Node for ComfyUI
+
+This node saves exactly 8 images as layers in a PSD file, with individual masks and layer names.
+"""
+
+import torch
+import os
+from typing import List, Optional, Tuple
+from ..utils.apz_psd_conversion import (
+    tensor_to_numpy_array,
+    create_psd_layer,
+    create_psd_from_layers,
+    save_psd_file,
+    validate_layer_dimensions
+)
+from ..utils.apz_psd_mask_utility import PSDMaskUtility
+
+
+class APZmediaPSDLayerSaver8Layers:
+    """
+    ComfyUI node for saving exactly 8 images as PSD layers with individual masks and names.
+    """
+    
+    def __init__(self, device="cpu"):
+        print("APZmediaPSDLayerSaver8Layers initialized")
+        self.device = device
+    
+    _blend_modes = [
+        "normal", "multiply", "screen", "overlay", "soft_light", "hard_light",
+        "color_dodge", "color_burn", "darken", "lighten", "difference", "exclusion"
+    ]
+    
+    _color_modes = ["rgb", "cmyk", "grayscale"]
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image_1": ("IMAGE",),
+                "image_2": ("IMAGE",),
+                "image_3": ("IMAGE",),
+                "image_4": ("IMAGE",),
+                "image_5": ("IMAGE",),
+                "image_6": ("IMAGE",),
+                "image_7": ("IMAGE",),
+                "image_8": ("IMAGE",),
+                "layer_name_1": ("STRING", {"default": "Layer 1"}),
+                "layer_name_2": ("STRING", {"default": "Layer 2"}),
+                "layer_name_3": ("STRING", {"default": "Layer 3"}),
+                "layer_name_4": ("STRING", {"default": "Layer 4"}),
+                "layer_name_5": ("STRING", {"default": "Layer 5"}),
+                "layer_name_6": ("STRING", {"default": "Layer 6"}),
+                "layer_name_7": ("STRING", {"default": "Layer 7"}),
+                "layer_name_8": ("STRING", {"default": "Layer 8"}),
+                "psd_filename": ("STRING", {"default": "output.psd"}),
+                "color_mode": (cls._color_modes, {"default": "rgb"}),
+            },
+            "optional": {
+                "mask_1": ("MASK",),
+                "mask_2": ("MASK",),
+                "mask_3": ("MASK",),
+                "mask_4": ("MASK",),
+                "mask_5": ("MASK",),
+                "mask_6": ("MASK",),
+                "mask_7": ("MASK",),
+                "mask_8": ("MASK",),
+                "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_4": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_5": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_6": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_7": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_8": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_1": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_2": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_3": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_4": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_5": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_8": (cls._blend_modes, {"default": "normal"}),
+                "create_background_layer": (["true", "false"], {"default": "false"}),
+                "background_color": ("STRING", {"default": "#FFFFFF"}),
+                "background_opacity": ("INT", {"default": 255, "min": 0, "max": 255}),
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "BOOLEAN", "INT")
+    RETURN_NAMES = ("output_path", "success", "layer_count")
+    FUNCTION = "save_8_layers_psd"
+    CATEGORY = "image/psd"
+    
+    def save_8_layers_psd(self, 
+                         image_1, image_2, image_3, image_4, 
+                         image_5, image_6, image_7, image_8,
+                         layer_name_1, layer_name_2, layer_name_3, layer_name_4,
+                         layer_name_5, layer_name_6, layer_name_7, layer_name_8,
+                         psd_filename, color_mode="rgb",
+                         mask_1=None, mask_2=None, mask_3=None, mask_4=None,
+                         mask_5=None, mask_6=None, mask_7=None, mask_8=None,
+                         opacity_1=255, opacity_2=255, opacity_3=255, opacity_4=255,
+                         opacity_5=255, opacity_6=255, opacity_7=255, opacity_8=255,
+                         blend_mode_1="normal", blend_mode_2="normal", blend_mode_3="normal", blend_mode_4="normal",
+                         blend_mode_5="normal", blend_mode_6="normal", blend_mode_7="normal", blend_mode_8="normal",
+                         create_background_layer="false", background_color="#FFFFFF", background_opacity=255) -> Tuple[str, bool, int]:
+        """
+        Saves exactly 8 images as layers in a PSD file with individual masks and properties.
+        
+        Args:
+            image_1-8: Individual image tensors
+            layer_name_1-8: Individual layer names
+            psd_filename: Name of the PSD file to create
+            color_mode: Color mode for the PSD file
+            mask_1-8: Optional individual masks
+            opacity_1-8: Individual opacity values (0-255)
+            blend_mode_1-8: Individual blend modes
+            create_background_layer: Whether to create a background layer
+            background_color: Hex color for background
+            background_opacity: Opacity for background layer
+            
+        Returns:
+            tuple of (output_path, success_boolean, layer_count)
+        """
+        try:
+            # Organize inputs into lists for easier processing
+            images = [image_1, image_2, image_3, image_4, image_5, image_6, image_7, image_8]
+            layer_names = [layer_name_1, layer_name_2, layer_name_3, layer_name_4, 
+                          layer_name_5, layer_name_6, layer_name_7, layer_name_8]
+            masks = [mask_1, mask_2, mask_3, mask_4, mask_5, mask_6, mask_7, mask_8]
+            opacities = [opacity_1, opacity_2, opacity_3, opacity_4, 
+                        opacity_5, opacity_6, opacity_7, opacity_8]
+            blend_modes = [blend_mode_1, blend_mode_2, blend_mode_3, blend_mode_4,
+                          blend_mode_5, blend_mode_6, blend_mode_7, blend_mode_8]
+            
+            # Filter out None masks and create a list of valid masks
+            valid_masks = []
+            for i, mask in enumerate(masks):
+                if mask is not None:
+                    # Process mask for PSD
+                    processed_mask = PSDMaskUtility.process_mask_for_psd(mask)
+                    valid_masks.append(processed_mask)
+                else:
+                    valid_masks.append(None)
+            
+            # Create PSD layers
+            layers = []
+            for i in range(8):
+                # Convert image tensor to numpy array
+                image_data = tensor_to_numpy_array(images[i])
+                
+                # Get mask data if provided
+                mask_data = valid_masks[i] if valid_masks[i] is not None else None
+                
+                # Create layer
+                layer = create_psd_layer(
+                    image_data=image_data,
+                    layer_name=layer_names[i],
+                    mask_data=mask_data,
+                    opacity=opacities[i],
+                    blend_mode=blend_modes[i]
+                )
+                
+                layers.append(layer)
+            
+            # Add background layer if requested
+            if create_background_layer == "true":
+                # Get image dimensions from first layer
+                first_image = tensor_to_numpy_array(images[0])
+                height, width = first_image.shape[:2]
+                
+                # Create background layer
+                background_data = self._create_background_layer(
+                    width, height, background_color, background_opacity
+                )
+                
+                background_layer = create_psd_layer(
+                    image_data=background_data,
+                    layer_name="Background",
+                    opacity=background_opacity,
+                    blend_mode="normal"
+                )
+                
+                # Add background as first layer
+                layers.insert(0, background_layer)
+            
+            # Validate layer dimensions
+            is_valid, error_msg = validate_layer_dimensions(layers)
+            if not is_valid:
+                print(f"Warning: {error_msg}")
+            
+            # Create PSD file
+            psd = create_psd_from_layers(layers, color_mode=color_mode)
+            
+            # Ensure output directory exists
+            output_dir = os.path.dirname(psd_filename) if os.path.dirname(psd_filename) else "."
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            
+            # Save PSD file
+            success = save_psd_file(psd, psd_filename)
+            
+            layer_count = len(layers)
+            
+            if success:
+                print(f"Successfully saved PSD file with {layer_count} layers to: {psd_filename}")
+                return psd_filename, True, layer_count
+            else:
+                print(f"Failed to save PSD file to: {psd_filename}")
+                return psd_filename, False, layer_count
+                
+        except Exception as e:
+            print(f"Error in save_8_layers_psd: {e}")
+            import traceback
+            traceback.print_exc()
+            return psd_filename, False, 0
+    
+    def _create_background_layer(self, width: int, height: int, 
+                                color: str, opacity: int) -> torch.Tensor:
+        """
+        Creates a background layer with the specified color and opacity.
+        
+        Args:
+            width: width of the background
+            height: height of the background
+            color: hex color string
+            opacity: opacity value (0-255)
+            
+        Returns:
+            numpy array with background data
+        """
+        import numpy as np
+        
+        # Parse hex color
+        color = color.lstrip('#')
+        if len(color) == 6:
+            r = int(color[0:2], 16)
+            g = int(color[2:4], 16)
+            b = int(color[4:6], 16)
+        else:
+            r, g, b = 255, 255, 255  # Default to white
+        
+        # Create background array
+        background = np.full((height, width, 3), [r, g, b], dtype=np.uint8)
+        
+        return background
+
+
+class APZmediaPSDLayerSaver8LayersAdvanced:
+    """
+    Advanced ComfyUI node for saving exactly 8 images as PSD layers with more control options.
+    """
+    
+    def __init__(self, device="cpu"):
+        print("APZmediaPSDLayerSaver8LayersAdvanced initialized")
+        self.device = device
+    
+    _blend_modes = [
+        "normal", "multiply", "screen", "overlay", "soft_light", "hard_light",
+        "color_dodge", "color_burn", "darken", "lighten", "difference", "exclusion"
+    ]
+    
+    _color_modes = ["rgb", "cmyk", "grayscale"]
+    
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image_1": ("IMAGE",),
+                "image_2": ("IMAGE",),
+                "image_3": ("IMAGE",),
+                "image_4": ("IMAGE",),
+                "image_5": ("IMAGE",),
+                "image_6": ("IMAGE",),
+                "image_7": ("IMAGE",),
+                "image_8": ("IMAGE",),
+                "layer_name_1": ("STRING", {"default": "Layer 1"}),
+                "layer_name_2": ("STRING", {"default": "Layer 2"}),
+                "layer_name_3": ("STRING", {"default": "Layer 3"}),
+                "layer_name_4": ("STRING", {"default": "Layer 4"}),
+                "layer_name_5": ("STRING", {"default": "Layer 5"}),
+                "layer_name_6": ("STRING", {"default": "Layer 6"}),
+                "layer_name_7": ("STRING", {"default": "Layer 7"}),
+                "layer_name_8": ("STRING", {"default": "Layer 8"}),
+                "psd_filename": ("STRING", {"default": "output.psd"}),
+                "color_mode": (cls._color_modes, {"default": "rgb"}),
+                "create_background_layer": (["true", "false"], {"default": "true"}),
+            },
+            "optional": {
+                "mask_1": ("MASK",),
+                "mask_2": ("MASK",),
+                "mask_3": ("MASK",),
+                "mask_4": ("MASK",),
+                "mask_5": ("MASK",),
+                "mask_6": ("MASK",),
+                "mask_7": ("MASK",),
+                "mask_8": ("MASK",),
+                "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_4": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_5": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_6": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_7": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "opacity_8": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_1": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_2": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_3": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_4": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_5": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
+                "blend_mode_8": (cls._blend_modes, {"default": "normal"}),
+                "background_color": ("STRING", {"default": "#FFFFFF"}),
+                "background_opacity": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "offset_x_1": ("INT", {"default": 0}),
+                "offset_y_1": ("INT", {"default": 0}),
+                "offset_x_2": ("INT", {"default": 0}),
+                "offset_y_2": ("INT", {"default": 0}),
+                "offset_x_3": ("INT", {"default": 0}),
+                "offset_y_3": ("INT", {"default": 0}),
+                "offset_x_4": ("INT", {"default": 0}),
+                "offset_y_4": ("INT", {"default": 0}),
+                "offset_x_5": ("INT", {"default": 0}),
+                "offset_y_5": ("INT", {"default": 0}),
+                "offset_x_6": ("INT", {"default": 0}),
+                "offset_y_6": ("INT", {"default": 0}),
+                "offset_x_7": ("INT", {"default": 0}),
+                "offset_y_7": ("INT", {"default": 0}),
+                "offset_x_8": ("INT", {"default": 0}),
+                "offset_y_8": ("INT", {"default": 0}),
+            }
+        }
+    
+    RETURN_TYPES = ("STRING", "BOOLEAN", "INT")
+    RETURN_NAMES = ("output_path", "success", "layer_count")
+    FUNCTION = "save_8_layers_psd_advanced"
+    CATEGORY = "image/psd"
+    
+    def save_8_layers_psd_advanced(self, 
+                                  image_1, image_2, image_3, image_4, 
+                                  image_5, image_6, image_7, image_8,
+                                  layer_name_1, layer_name_2, layer_name_3, layer_name_4,
+                                  layer_name_5, layer_name_6, layer_name_7, layer_name_8,
+                                  psd_filename, color_mode="rgb", create_background_layer="true",
+                                  mask_1=None, mask_2=None, mask_3=None, mask_4=None,
+                                  mask_5=None, mask_6=None, mask_7=None, mask_8=None,
+                                  opacity_1=255, opacity_2=255, opacity_3=255, opacity_4=255,
+                                  opacity_5=255, opacity_6=255, opacity_7=255, opacity_8=255,
+                                  blend_mode_1="normal", blend_mode_2="normal", blend_mode_3="normal", blend_mode_4="normal",
+                                  blend_mode_5="normal", blend_mode_6="normal", blend_mode_7="normal", blend_mode_8="normal",
+                                  background_color="#FFFFFF", background_opacity=255,
+                                  offset_x_1=0, offset_y_1=0, offset_x_2=0, offset_y_2=0,
+                                  offset_x_3=0, offset_y_3=0, offset_x_4=0, offset_y_4=0,
+                                  offset_x_5=0, offset_y_5=0, offset_x_6=0, offset_y_6=0,
+                                  offset_x_7=0, offset_y_7=0, offset_x_8=0, offset_y_8=0) -> Tuple[str, bool, int]:
+        """
+        Advanced PSD layer saving with background layer and offset support for exactly 8 layers.
+        
+        Args:
+            image_1-8: Individual image tensors
+            layer_name_1-8: Individual layer names
+            psd_filename: Name of the PSD file to create
+            color_mode: Color mode for the PSD file
+            create_background_layer: Whether to create a background layer
+            mask_1-8: Optional individual masks
+            opacity_1-8: Individual opacity values (0-255)
+            blend_mode_1-8: Individual blend modes
+            background_color: Hex color for background
+            background_opacity: Opacity for background layer
+            offset_x_1-8, offset_y_1-8: Individual layer offsets
+            
+        Returns:
+            tuple of (output_path, success_boolean, layer_count)
+        """
+        try:
+            # Organize inputs into lists for easier processing
+            images = [image_1, image_2, image_3, image_4, image_5, image_6, image_7, image_8]
+            layer_names = [layer_name_1, layer_name_2, layer_name_3, layer_name_4, 
+                          layer_name_5, layer_name_6, layer_name_7, layer_name_8]
+            masks = [mask_1, mask_2, mask_3, mask_4, mask_5, mask_6, mask_7, mask_8]
+            opacities = [opacity_1, opacity_2, opacity_3, opacity_4, 
+                        opacity_5, opacity_6, opacity_7, opacity_8]
+            blend_modes = [blend_mode_1, blend_mode_2, blend_mode_3, blend_mode_4,
+                          blend_mode_5, blend_mode_6, blend_mode_7, blend_mode_8]
+            offsets = [(offset_x_1, offset_y_1), (offset_x_2, offset_y_2), (offset_x_3, offset_y_3), (offset_x_4, offset_y_4),
+                      (offset_x_5, offset_y_5), (offset_x_6, offset_y_6), (offset_x_7, offset_y_7), (offset_x_8, offset_y_8)]
+            
+            # Filter out None masks and create a list of valid masks
+            valid_masks = []
+            for i, mask in enumerate(masks):
+                if mask is not None:
+                    # Process mask for PSD
+                    processed_mask = PSDMaskUtility.process_mask_for_psd(mask)
+                    valid_masks.append(processed_mask)
+                else:
+                    valid_masks.append(None)
+            
+            # Create PSD layers
+            layers = []
+            for i in range(8):
+                # Convert image tensor to numpy array
+                image_data = tensor_to_numpy_array(images[i])
+                
+                # Get mask data if provided
+                mask_data = valid_masks[i] if valid_masks[i] is not None else None
+                
+                # Create layer
+                layer = create_psd_layer(
+                    image_data=image_data,
+                    layer_name=layer_names[i],
+                    mask_data=mask_data,
+                    opacity=opacities[i],
+                    blend_mode=blend_modes[i]
+                )
+                
+                # Note: Layer offsets would need to be implemented in the PSD layer creation
+                # For now, we'll create the layers without offset support
+                # This could be enhanced in future versions
+                
+                layers.append(layer)
+            
+            # Add background layer if requested
+            if create_background_layer == "true":
+                # Get image dimensions from first layer
+                first_image = tensor_to_numpy_array(images[0])
+                height, width = first_image.shape[:2]
+                
+                # Create background layer
+                background_data = self._create_background_layer(
+                    width, height, background_color, background_opacity
+                )
+                
+                background_layer = create_psd_layer(
+                    image_data=background_data,
+                    layer_name="Background",
+                    opacity=background_opacity,
+                    blend_mode="normal"
+                )
+                
+                # Add background as first layer
+                layers.insert(0, background_layer)
+            
+            # Validate layer dimensions
+            is_valid, error_msg = validate_layer_dimensions(layers)
+            if not is_valid:
+                print(f"Warning: {error_msg}")
+            
+            # Create PSD file
+            psd = create_psd_from_layers(layers, color_mode=color_mode)
+            
+            # Ensure output directory exists
+            output_dir = os.path.dirname(psd_filename) if os.path.dirname(psd_filename) else "."
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            
+            # Save PSD file
+            success = save_psd_file(psd, psd_filename)
+            
+            layer_count = len(layers)
+            
+            if success:
+                print(f"Successfully saved PSD file with {layer_count} layers to: {psd_filename}")
+                return psd_filename, True, layer_count
+            else:
+                print(f"Failed to save PSD file to: {psd_filename}")
+                return psd_filename, False, layer_count
+                
+        except Exception as e:
+            print(f"Error in save_8_layers_psd_advanced: {e}")
+            import traceback
+            traceback.print_exc()
+            return psd_filename, False, 0
+    
+    def _create_background_layer(self, width: int, height: int, 
+                                color: str, opacity: int) -> torch.Tensor:
+        """
+        Creates a background layer with the specified color and opacity.
+        
+        Args:
+            width: width of the background
+            height: height of the background
+            color: hex color string
+            opacity: opacity value (0-255)
+            
+        Returns:
+            numpy array with background data
+        """
+        import numpy as np
+        
+        # Parse hex color
+        color = color.lstrip('#')
+        if len(color) == 6:
+            r = int(color[0:2], 16)
+            g = int(color[2:4], 16)
+            b = int(color[4:6], 16)
+        else:
+            r, g, b = 255, 255, 255  # Default to white
+        
+        # Create background array
+        background = np.full((height, width, 3), [r, g, b], dtype=np.uint8)
+        
+        return background
