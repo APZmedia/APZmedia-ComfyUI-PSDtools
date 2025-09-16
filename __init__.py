@@ -36,6 +36,41 @@ except Exception as e:
     AUTO_INSTALLER_AVAILABLE = False
     print(f"{Colors.RED}❌ Error importing auto-installer: {e}{Colors.END}")
 
+# Simple dependency installer function (fallback)
+def simple_install_dependencies():
+    """Simple dependency installer as fallback"""
+    try:
+        import subprocess
+        import sys
+        
+        packages = [
+            ("pytoshop", "-I --no-cache-dir"),
+            ("psd-tools", "--no-deps"),
+            ("Pillow>=8.0.0", None),
+            ("torch>=1.7.0", None),
+            ("numpy>=1.19.0", None)
+        ]
+        
+        for package, flags in packages:
+            try:
+                cmd = [sys.executable, "-m", "pip", "install"]
+                if flags:
+                    cmd.extend(flags.split())
+                cmd.append(package)
+                
+                result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+                if result.returncode == 0:
+                    print(f"{Colors.GREEN}✅ Installed {package}{Colors.END}")
+                else:
+                    print(f"{Colors.YELLOW}⚠️ Failed to install {package}{Colors.END}")
+            except Exception as e:
+                print(f"{Colors.YELLOW}⚠️ Error installing {package}: {e}{Colors.END}")
+        
+        return True
+    except Exception as e:
+        print(f"{Colors.RED}❌ Error in simple installer: {e}{Colors.END}")
+        return False
+
 # Set up logging with console output
 logging.basicConfig(
     level=logging.INFO,
@@ -99,7 +134,11 @@ if AUTO_INSTALLER_AVAILABLE:
         print(f"{Colors.RED}❌ Error during automatic installation: {e}{Colors.END}")
         logger.error("Error during automatic dependency installation", exc_info=True)
 else:
-    print(f"{Colors.YELLOW}⚠️ Auto-installer not available, checking dependencies manually...{Colors.END}")
+    print(f"{Colors.YELLOW}⚠️ Auto-installer not available, using simple installer...{Colors.END}")
+    try:
+        simple_install_dependencies()
+    except Exception as e:
+        print(f"{Colors.RED}❌ Error in simple installer: {e}{Colors.END}")
 
 # Check if pytoshop is available (fallback check)
 try:
