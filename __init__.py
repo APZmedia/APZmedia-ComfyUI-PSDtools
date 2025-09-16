@@ -1,8 +1,8 @@
 """
 @author: Pablo Apiolazza
-@title: ComfyUI APZmedia Text Tools
-@nickname: ComfyUI Text Tools
-@description: This extension provides rich text overlay functionalities, color management, and text parsing utilities for ComfyUI.
+@title: ComfyUI APZmedia PSD Tools
+@nickname: ComfyUI PSD Tools
+@description: This extension provides PSD layer saving functionalities with mask support for ComfyUI.
 """
 
 import os
@@ -23,50 +23,38 @@ sys.path.append(nodes_path)
 
 # Importing custom nodes
 try:
-    from .nodes.apzImageRichTextOverlay import APZmediaImageRichTextOverlay
-    logger.info("Successfully imported APZmediaImageRichTextOverlay node.")
+    from .nodes.apzPSDLayerSaver import APZmediaPSDLayerSaver
+    logger.info("Successfully imported APZmediaPSDLayerSaver node.")
 except Exception as e:
-    logger.error("Failed to import APZmediaImageRichTextOverlay node.", exc_info=True)
+    logger.error("Failed to import APZmediaPSDLayerSaver node.", exc_info=True)
 
 try:
-    from .nodes.apzImageRichTextOverlayV2 import APZmediaImageRichTextOverlayV2
-    logger.info("Successfully imported APZmediaImageRichTextOverlayV2 node.")
+    from .nodes.apzPSDLayerSaver import APZmediaPSDLayerSaverAdvanced
+    logger.info("Successfully imported APZmediaPSDLayerSaverAdvanced node.")
 except Exception as e:
-    logger.error("Failed to import APZmediaImageRichTextOverlayV2 node.", exc_info=True)
-
-try:
-    from .nodes.apzImageMarkdownTextOverlay import APZmediaImageMarkdownTextOverlay
-    logger.info("Successfully imported APZmediaImageMarkdownTextOverlay node.")
-except Exception as e:
-    logger.error("Failed to import APZmediaImageMarkdownTextOverlay node.", exc_info=True)
+    logger.error("Failed to import APZmediaPSDLayerSaverAdvanced node.", exc_info=True)
 
 # Utilities should be imported as needed, but not registered as nodes
 try:
-    from .utils import apz_font_manager
-    from .utils import apz_rich_text_parser
-    from .utils import apz_markdown_parser
+    from .utils import apz_psd_conversion
+    from .utils import apz_psd_mask_utility
     from .utils import apz_image_conversion
-    from .utils import apz_text_wrapper
-    from .utils import apz_text_renderer_utility
-    from .utils import apz_error_handler
-    logger.info("Successfully imported utility modules.")
+    logger.info("Successfully imported PSD utility modules.")
 except Exception as e:
-    logger.error("Failed to import utility modules.", exc_info=True)
+    logger.error("Failed to import PSD utility modules.", exc_info=True)
 
 NODE_CLASS_MAPPINGS = {
-    "APZmediaImageRichTextOverlay": APZmediaImageRichTextOverlay,
-    "APZmediaImageRichTextOverlayV2": APZmediaImageRichTextOverlayV2,
-    "APZmediaImageMarkdownTextOverlay": APZmediaImageMarkdownTextOverlay,
+    "APZmediaPSDLayerSaver": APZmediaPSDLayerSaver,
+    "APZmediaPSDLayerSaverAdvanced": APZmediaPSDLayerSaverAdvanced,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "APZmediaImageRichTextOverlay": "APZmedia Image Rich Text Overlay",
-    "APZmediaImageRichTextOverlayV2": "APZmedia Image Rich Text Overlay V2",
-    "APZmediaImageMarkdownTextOverlay": "APZmedia Image Markdown Text Overlay",
+    "APZmediaPSDLayerSaver": "APZmedia PSD Layer Saver",
+    "APZmediaPSDLayerSaverAdvanced": "APZmedia PSD Layer Saver Advanced",
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
 
 # Additional setup, such as threading or other initializations, can be added here if necessary
 
-logger.info("ComfyUI Text Tools extension has been loaded successfully.")
+logger.info("ComfyUI PSD Tools extension has been loaded successfully.")

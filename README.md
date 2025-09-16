@@ -1,298 +1,258 @@
-# ComfyUI-textools
+# ComfyUI-APZmedia-PSDtools
 
-**ComfyUI-textools** is a collection of custom nodes designed for use with ComfyUI. These nodes enhance text processing capabilities, including applying rich text overlays on images with comprehensive error handling and fallback mechanisms.
+**ComfyUI-APZmedia-PSDtools** is a collection of custom nodes designed for use with ComfyUI. These nodes provide functionality for saving images as layers in PSD files with mask support, enabling seamless integration between ComfyUI workflows and Adobe Photoshop.
 
 ## Overview
 
-ComfyUI-textools includes several custom nodes, such as:
+ComfyUI-APZmedia-PSDtools includes custom nodes for:
 
-- **APZmedia Image Rich Text Overlay**: A node for overlaying rich text on images with support for bold, italic, underline, and strike-through styles using HTML-like tags.
-- **APZmedia Image Rich Text Overlay V2**: Enhanced version with comprehensive error handling, fallback mechanisms, and visual error indicators.
-- **APZmedia Image Markdown Text Overlay**: A node for overlaying markdown-formatted text on images with support for bold, italic, underline, strikethrough, headers, and lists.
+- **APZmedia PSD Layer Saver**: A node for saving multiple images as layers in a PSD file with optional masks
+- **APZmedia PSD Layer Saver Advanced**: An enhanced version with background layer support and advanced layer options
 
 ## Features
 
-### URL Support for Fonts
-All text overlay nodes now support both local file paths and signed URLs for font files:
+### Core Functionality
+- **Multi-Layer PSD Creation**: Save multiple images as separate layers in a single PSD file
+- **Mask Support**: Apply masks to individual layers for precise control
+- **Layer Naming**: Custom names for each layer
+- **Opacity Control**: Set individual opacity for each layer (0-255)
+- **Blend Modes**: Support for various blend modes (normal, multiply, screen, overlay, etc.)
+- **Color Mode Support**: RGB, CMYK, and Grayscale color modes
 
-- **Local Paths**: Works exactly as before with local font files
-- **Signed URLs**: Automatically downloads fonts from URLs and caches them locally
-- **Mixed Usage**: You can use local paths for some fonts and URLs for others
-- **Automatic Caching**: Downloaded fonts are cached to avoid re-downloading
-- **Cleanup**: Old cached files are automatically cleaned up
-- **No Input Changes**: No changes needed to node inputs or structure
+### Advanced Features
+- **Background Layer**: Optional background layer with custom color and opacity
+- **Layer Offsets**: Position layers with custom X,Y offsets
+- **Automatic Dimension Validation**: Ensures all layers have compatible dimensions
+- **Error Handling**: Comprehensive error handling with detailed feedback
+- **Batch Processing**: Process multiple images and masks in a single operation
 
-**Examples:**
+## Installation
+
+1. Clone or download this repository to your ComfyUI custom nodes directory
+2. Install the required dependencies:
+   ```bash
+   pip install pytoshop>=0.1.0 Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
+   ```
+3. Restart ComfyUI
+
+## Node Reference
+
+### APZmedia PSD Layer Saver
+
+**Category**: `image/psd`
+
+**Inputs**:
+- **images** (IMAGE): Batch of images to save as layers
+- **layer_names** (STRING): Newline-separated list of layer names
+- **output_path** (STRING): Path where to save the PSD file
+- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
+- **masks** (MASK, optional): Batch of masks to apply to layers
+- **opacities** (STRING, optional): Newline-separated list of opacity values (0-255)
+- **blend_modes** (STRING, optional): Newline-separated list of blend mode names
+- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
+
+**Outputs**:
+- **output_path** (STRING): Path where the PSD file was saved
+- **success** (BOOLEAN): Whether the operation was successful
+
+### APZmedia PSD Layer Saver Advanced
+
+**Category**: `image/psd`
+
+**Inputs**:
+- **images** (IMAGE): Batch of images to save as layers
+- **layer_names** (STRING): Newline-separated list of layer names
+- **output_path** (STRING): Path where to save the PSD file
+- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
+- **create_background_layer** (COMBO): Whether to create a background layer (true/false)
+- **masks** (MASK, optional): Batch of masks to apply to layers
+- **opacities** (STRING, optional): Newline-separated list of opacity values (0-255)
+- **blend_modes** (STRING, optional): Newline-separated list of blend mode names
+- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
+- **background_opacity** (INT, optional): Opacity for background layer (0-255)
+- **layer_offsets** (STRING, optional): Newline-separated list of "x,y" offsets
+
+**Outputs**:
+- **output_path** (STRING): Path where the PSD file was saved
+- **success** (BOOLEAN): Whether the operation was successful
+- **layer_count** (INT): Number of layers created in the PSD file
+
+## Usage Examples
+
+### Basic Usage
+
+1. **Load Images**: Use ComfyUI's image loading nodes to load your images
+2. **Connect to PSD Layer Saver**: Connect the images to the `images` input
+3. **Set Layer Names**: Enter layer names, one per line:
+   ```
+   Background
+   Foreground
+   Overlay
+   ```
+4. **Set Output Path**: Specify where to save the PSD file (e.g., `./output.psd`)
+5. **Run**: Execute the workflow to create the PSD file
+
+### Advanced Usage with Masks
+
+1. **Load Images and Masks**: Load both images and corresponding masks
+2. **Connect to Advanced Saver**: Use the Advanced node for more control
+3. **Configure Layer Properties**:
+   - Layer names: `Background\nCharacter\nEffects`
+   - Opacities: `255\n200\n150`
+   - Blend modes: `normal\nmultiply\noverlay`
+4. **Enable Background**: Set `create_background_layer` to `true`
+5. **Set Background Color**: Use hex color like `#FF0000` for red background
+
+### Layer Names Format
+
+Enter layer names separated by newlines:
 ```
-Local paths:
-font: "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-
-Signed URLs:
-font: "https://your-cdn.com/fonts/regular.ttf?signature=abc123"
-
-Mixed usage:
-font: "/local/path/regular.ttf"
-italic_font: "https://cdn.com/italic.ttf?signature=xyz"
-```
-
-### APZmedia Image Rich Text Overlay
-- **Rich Text Support**: Allows the addition of bold, italic, underline, and strike-through text on images.
-- **Customizable Fonts**: Supports different fonts for regular, bold, and italic text from local paths or signed URLs.
-- **URL Support**: Automatically downloads fonts from signed URLs and caches them locally for optimal performance.
-- **Alignment Options**: Supports text alignment (left, right, center) and vertical alignment (top, middle, bottom).
-- **Text Wrapping**: Automatically wraps text within a defined box area.
-
-### APZmedia Image Rich Text Overlay V2
-- **All V1 Features**: Includes all features from the original rich text overlay.
-- **Enhanced Error Handling**: Comprehensive fallback mechanisms for font loading and text overflow issues.
-- **Progressive Font Scaling**: Automatically scales font sizes from maximum down to 2px when text doesn't fit.
-- **Intelligent Text Truncation**: Smart text truncation strategies when scaling fails.
-- **Visual Error Indicators**: Shows error messages directly on images when problems occur (optional).
-- **Parameter Validation**: Validates input parameters and provides helpful warnings.
-- **Graceful Degradation**: Continues to work even when encountering errors.
-- **Error Indicator Toggle**: Option to show or hide visual error indicators.
-- **Console Feedback**: Reports scaling actions and fallback strategies used.
-
-### APZmedia Image Markdown Text Overlay
-- **Markdown Support**: Supports standard markdown syntax including **bold**, *italic*, __underline__, ~~strikethrough~~, headers (# ## ###), and lists.
-- **Multiple Modes**: Three parsing modes - basic (text styling only), with_headers (includes header support), and extended (includes lists and code blocks).
-- **Customizable Fonts**: Same font customization options as the rich text overlay.
-- **Alignment Options**: Same alignment and positioning options as the rich text overlay.
-- **Text Wrapping**: Advanced text wrapping that respects markdown formatting.
-- **Enhanced Error Handling**: Same comprehensive error handling and font scaling as V2 rich text overlay.
-- **Progressive Font Scaling**: Automatically scales font sizes when markdown text doesn't fit.
-- **Smart Fallback Strategies**: Intelligent text processing and truncation when needed.
-
-## Input Types
-
-### APZmedia Image Rich Text Overlay
-- **image (IMAGE)**: The image to which the text will be applied.
-- **theText (STRING)**: The rich text string to overlay on the image, with support for HTML-like tags (e.g., `<b>`, `<i>`, etc.).
-- **theTextbox_width (INT)**: Width of the text box.
-- **theTextbox_height (INT)**: Height of the text box.
-- **max_font_size (INT)**: Maximum font size to use.
-- **font (STRING)**: Path to the font file.
-- **italic_font (STRING)**: Path to the italic font file.
-- **bold_font (STRING)**: Path to the bold font file.
-- **alignment (STRING)**: Horizontal text alignment (left, right, center).
-- **vertical_alignment (STRING)**: Vertical text alignment (top, middle, bottom).
-- **font_color (STRING)**: Color of the font.
-- **italic_font_color (STRING)**: Color of the italic font.
-- **bold_font_color (STRING)**: Color of the bold font.
-- **box_start_x (INT)**: X-coordinate for the text box's starting position.
-- **box_start_y (INT)**: Y-coordinate for the text box's starting position.
-- **padding (INT)**: Padding inside the text box.
-- **line_height_ratio (FLOAT)**: Ratio for line height relative to font size.
-
-### APZmedia Image Rich Text Overlay V2
-- **All V1 Parameters**: Includes all parameters from the original rich text overlay.
-- **show_error_indicators (STRING)**: Show visual error indicators (true/false). When enabled, displays error messages directly on the image when text cannot be rendered properly.
-
-### APZmedia Image Markdown Text Overlay
-- **image (IMAGE)**: The image to which the text will be applied.
-- **theText (STRING)**: The markdown text string to overlay on the image.
-- **markdown_mode (STRING)**: Markdown parsing mode (basic, with_headers, extended).
-- **theTextbox_width (INT)**: Width of the text box.
-- **theTextbox_height (INT)**: Height of the text box.
-- **max_font_size (INT)**: Maximum font size to use.
-- **font (STRING)**: Path to the font file.
-- **italic_font (STRING)**: Path to the italic font file.
-- **bold_font (STRING)**: Path to the bold font file.
-- **alignment (STRING)**: Horizontal text alignment (left, right, center).
-- **vertical_alignment (STRING)**: Vertical text alignment (top, middle, bottom).
-- **font_color (STRING)**: Color of the font.
-- **italic_font_color (STRING)**: Color of the italic font.
-- **bold_font_color (STRING)**: Color of the bold font.
-- **box_start_x (INT)**: X-coordinate for the text box's starting position.
-- **box_start_y (INT)**: Y-coordinate for the text box's starting position.
-- **padding (INT)**: Padding inside the text box.
-- **line_height_ratio (FLOAT)**: Ratio for line height relative to font size.
-
-## Output Types
-
-### APZmedia Image Rich Text Overlay
-- **image (IMAGE)**: The image with the applied text overlay.
-
-### APZmedia Image Rich Text Overlay V2
-- **image (IMAGE)**: The image with the applied text overlay (with error handling).
-
-### APZmedia Image Markdown Text Overlay
-- **image (IMAGE)**: The image with the applied markdown text overlay.
-
-## How It Works
-
-### APZmedia Image Rich Text Overlay
-1. **Text Wrapping**: Automatically wraps the provided text within the specified width and height.
-2. **Rich Text Processing**: Processes tags like `<b>` for bold and `<i>` for italic, applying the appropriate styles.
-3. **Text Overlay**: Draws the text onto the image with the specified alignment and font settings.
-4. **Text Box**: Draws a box around the text with the specified padding and line height ratio.
-5. **Output**: Returns the image with the text overlay applied.
-
-### APZmedia Image Rich Text Overlay V2
-1. **Parameter Validation**: Validates all input parameters and provides warnings for invalid values.
-2. **Enhanced Text Wrapping**: Advanced text wrapping with comprehensive error handling.
-3. **Rich Text Processing**: Same processing as V1 with enhanced error recovery.
-4. **Progressive Font Scaling**: Automatically reduces font size from maximum down to 2px when text doesn't fit.
-5. **Intelligent Text Truncation**: Applies smart truncation strategies (100 → 50 → 25 characters) when scaling fails.
-6. **Error Handling**: Provides fallback mechanisms for font loading and text overflow issues.
-7. **Visual Error Indicators**: Shows error messages on images when problems occur (optional).
-8. **Console Feedback**: Reports scaling actions and fallback strategies used.
-9. **Graceful Degradation**: Continues to work even when encountering errors.
-10. **Output**: Returns the image with the text overlay applied, scaled text, or error indicators.
-
-### APZmedia Image Markdown Text Overlay
-1. **Markdown Parsing**: Parses markdown syntax based on the selected mode (basic, with_headers, extended).
-2. **Text Wrapping**: Advanced text wrapping that respects markdown formatting and word boundaries.
-3. **Style Application**: Applies appropriate fonts and colors based on markdown formatting.
-4. **Progressive Font Scaling**: Same automatic font scaling as V2 rich text overlay.
-5. **Intelligent Text Truncation**: Smart truncation strategies when markdown text doesn't fit.
-6. **Layout Rendering**: Renders text with proper alignment and positioning while maintaining markdown structure.
-7. **Error Handling**: Comprehensive error handling with fallback mechanisms.
-8. **Output**: Returns the image with the markdown text overlay applied, scaled text, or error indicators.
-
-## Error Handling & Fallback Mechanisms
-
-ComfyUI-textools includes comprehensive error handling to ensure your text overlays always work, even in challenging scenarios.
-
-### Progressive Font Scaling
-
-When text doesn't fit in the specified dimensions, the system automatically scales down the font size:
-
-1. **Normal Scaling**: Reduces font size from maximum to minimum (6px) in 1px increments
-2. **Aggressive Scaling**: Goes below minimum to very small sizes (down to 2px)
-3. **Text Truncation**: Applies smart truncation strategies when scaling fails
-4. **Error Indicators**: Shows visual error messages when all strategies fail
-
-### Scaling Strategies
-
-```
-Original Font Size (e.g., 30px)
-    ↓
-Progressive Reduction (29px, 28px, 27px...)
-    ↓
-Minimum Size (6px)
-    ↓
-Aggressive Scaling (5px, 4px, 3px, 2px)
-    ↓
-Text Truncation (100 → 50 → 25 characters)
-    ↓
-Error Message ("Text overflow")
+Background Layer
+Character
+Hair
+Clothing
+Accessories
 ```
 
-### Console Feedback
+### Opacity Values Format
 
-The system provides detailed console feedback about scaling actions:
-
+Enter opacity values (0-255) separated by newlines:
 ```
-Warning: Text overflow detected at font size 30
-Font scaling fallback: Font scaled to 12 (Reduced by 18)
+255
+200
+150
+100
+50
 ```
 
-### Error Indicator Options
+### Blend Modes Format
 
-- **Enabled**: Shows red error boxes with messages on the image
-- **Disabled**: Uses fallback text without visual indicators
-- **Console Warnings**: Always provides feedback in the console
+Enter blend mode names separated by newlines:
+```
+normal
+multiply
+screen
+overlay
+soft_light
+```
 
-## Markdown Syntax Support
+### Layer Offsets Format
 
-The markdown text overlay supports the following syntax:
+Enter X,Y coordinates separated by newlines:
+```
+0,0
+10,20
+-5,15
+0,0
+```
 
-### Basic Mode
-- `**text**` - Bold text
-- `*text*` - Italic text
-- `__text__` - Underlined text
-- `~~text~~` - Strikethrough text
+## Supported Blend Modes
 
-### With Headers Mode
-- All basic mode features
-- `# Header 1` - Large header (rendered as bold)
-- `## Header 2` - Medium header (rendered as bold)
-- `### Header 3` - Small header (rendered as bold)
+- `normal` - Normal blending
+- `multiply` - Multiply blending
+- `screen` - Screen blending
+- `overlay` - Overlay blending
+- `soft_light` - Soft light blending
+- `hard_light` - Hard light blending
+- `color_dodge` - Color dodge blending
+- `color_burn` - Color burn blending
+- `darken` - Darken blending
+- `lighten` - Lighten blending
+- `difference` - Difference blending
+- `exclusion` - Exclusion blending
 
-### Extended Mode
-- All with_headers mode features
-- `- item` or `* item` - List items (rendered with bullet points)
-- `1. item` - Numbered list items
-- `` `code` `` - Inline code (rendered as bold)
+## Color Modes
 
-## Node Comparison & Usage Recommendations
+- **RGB**: Standard RGB color mode (recommended for most use cases)
+- **CMYK**: CMYK color mode for print workflows
+- **Grayscale**: Grayscale color mode for monochrome images
 
-### Node Feature Comparison
+## Mask Handling
 
-| Feature | Rich Text V1 | Rich Text V2 | Markdown |
-|---------|--------------|--------------|----------|
-| Basic Functionality | ✅ | ✅ | ✅ |
-| Error Handling | ❌ | ✅ | ✅ |
-| Progressive Font Scaling | ❌ | ✅ | ✅ |
-| Visual Error Indicators | ❌ | ✅ | ❌ |
-| Parameter Validation | ❌ | ✅ | ✅ |
-| Console Feedback | ❌ | ✅ | ✅ |
-| Backward Compatibility | ✅ | ✅ | ✅ |
+The nodes automatically handle various mask formats:
+- **Tensor Masks**: ComfyUI MASK input type
+- **Grayscale Images**: Automatically converted to masks
+- **Alpha Channels**: Extracted from RGBA images
+- **Normalization**: Masks are automatically normalized to 0-255 range
 
-### Usage Recommendations
+## Error Handling
 
-#### **For New Projects**
-- **Rich Text V2**: Recommended for enhanced reliability and error handling
-- **Markdown**: Use when you prefer markdown syntax over HTML-like tags
-
-#### **For Existing Projects**
-- **Rich Text V1**: Keep using for stability, migrate to V2 when needed
-- **Rich Text V2**: Use for new features or when encountering text overflow issues
-
-#### **For Production Use**
-- **Rich Text V2**: Recommended for better error handling and reliability
-- **Markdown**: Use for content that benefits from markdown formatting
-
-#### **For Testing & Development**
-- **Rich Text V1**: Use as baseline for comparison
-- **Rich Text V2**: Use for enhanced features and error handling
-- **Markdown**: Use for markdown-specific content testing
+The nodes include comprehensive error handling:
+- **Dimension Validation**: Ensures all layers have compatible dimensions
+- **File Path Validation**: Checks output directory and creates if needed
+- **Mask Processing**: Handles various mask formats gracefully
+- **Fallback Values**: Uses sensible defaults when optional inputs are missing
 
 ## Troubleshooting
 
-### Common Issues & Solutions
+### Common Issues
 
-#### **Text Not Rendering**
-- **Problem**: Text appears too small or doesn't show
-- **Solution**: Check console for scaling messages. The system automatically scales down font sizes when needed.
+#### "Failed to save PSD file"
+- **Check Output Path**: Ensure the output directory exists and is writable
+- **Check Permissions**: Verify write permissions for the output location
+- **Check Disk Space**: Ensure sufficient disk space for the PSD file
 
-#### **Font Loading Errors**
-- **Problem**: Font files not found
-- **Solution**: Use system font paths or enable error indicators to see fallback behavior.
+#### "Layer dimensions don't match"
+- **Resize Images**: Use ComfyUI's resize nodes to make all images the same size
+- **Check Image Formats**: Ensure all images have the same dimensions
 
-#### **Text Overflow**
-- **Problem**: Text doesn't fit in specified box
-- **Solution**: The system automatically handles this with progressive scaling and truncation.
+#### "Mask processing error"
+- **Check Mask Format**: Ensure masks are in the correct format (grayscale)
+- **Check Mask Dimensions**: Masks should match image dimensions
 
-#### **Performance Issues**
-- **Problem**: Slow rendering with large text
-- **Solution**: Use V2 nodes which include optimized error handling and caching.
+### Console Output
 
-### Console Messages
-
-The system provides helpful console feedback:
-
+The nodes provide detailed console output for debugging:
 ```
-# Normal operation
-APZmediaImageRichTextOverlayV2 initialized with enhanced error handling
-
-# Warning messages
-Warning: Text overflow detected at font size 30
-Warning: Word 'supercalifragilisticexpialidocious' is too long
-
-# Scaling feedback
-Font scaling fallback: Font scaled to 12 (Reduced by 18)
-Markdown font scaling fallback: Text truncated to 50 chars
-
-# Error indicators
-Text overflow - all scaling strategies failed
+APZmediaPSDLayerSaver initialized
+Successfully saved PSD file with 3 layers to: ./output.psd
 ```
 
-### Getting Help
+## Technical Details
 
-- **Check Console**: Always check console output for detailed feedback
-- **Enable Error Indicators**: Use `show_error_indicators = true` to see visual error messages
-- **Try Different Nodes**: Use V2 nodes for enhanced error handling
-- **Adjust Parameters**: Reduce font size or increase text box dimensions if needed
+### Dependencies
+- **pytoshop**: Core PSD file creation library
+- **Pillow**: Image processing and format support
+- **torch**: Tensor operations and ComfyUI integration
+- **numpy**: Numerical operations and array handling
+
+### File Format Support
+- **Input**: ComfyUI IMAGE and MASK tensors
+- **Output**: Adobe Photoshop PSD files
+- **Compatibility**: Compatible with Photoshop CS6 and later
+
+### Performance Considerations
+- **Memory Usage**: Large images may require significant memory
+- **Processing Time**: Complex PSD files with many layers may take time to create
+- **File Size**: PSD files can be large, especially with high-resolution images
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit issues, feature requests, or pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Changelog
+
+### Version 0.2.0
+- Complete refactor from text overlay functionality to PSD layer saving
+- Added support for masks and layer properties
+- Implemented advanced layer options
+- Added comprehensive error handling
+- Updated dependencies to include pytoshop
+
+### Version 0.1.0
+- Initial release with text overlay functionality (deprecated)
+
+## Support
+
+For support, please open an issue on the GitHub repository or contact the maintainer.
+
+## Acknowledgments
+
+- **pytoshop**: For providing the PSD file creation capabilities
+- **ComfyUI Community**: For the excellent framework and ecosystem
+- **Adobe**: For the PSD file format specification
 

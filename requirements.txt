@@ -1,6 +1,4 @@
-colorama
-PIL
-torch
-numpy
-os
-re
+pytoshop>=0.1.0
+Pillow>=8.0.0
+torch>=1.7.0
+numpy>=1.19.0
