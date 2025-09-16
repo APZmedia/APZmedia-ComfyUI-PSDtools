@@ -23,6 +23,10 @@ class Colors:
     BOLD = '\033[1m'           # Bold
     END = '\033[0m'            # End color
 
+print(f"{Colors.ORANGE}{'='*60}{Colors.END}")
+print(f"{Colors.ORANGE}APZmedia PSD Tools Extension - Starting Load Process{Colors.END}")
+print(f"{Colors.ORANGE}{'='*60}{Colors.END}")
+
 # Import automatic dependency installer
 try:
     from auto_installer import auto_install_dependencies, ensure_dependencies
@@ -36,362 +40,157 @@ except Exception as e:
     AUTO_INSTALLER_AVAILABLE = False
     print(f"{Colors.RED}❌ Error importing auto-installer: {e}{Colors.END}")
 
-# Simple dependency installer function (fallback)
-def simple_install_dependencies():
-    """Simple dependency installer as fallback"""
-    try:
-        import subprocess
-        import sys
-        
-        packages = [
-            ("pytoshop", "-I --no-cache-dir"),
-            ("psd-tools", "--no-deps"),
-            ("Pillow>=8.0.0", None),
-            ("torch>=1.7.0", None),
-            ("numpy>=1.19.0", None)
-        ]
-        
-        for package, flags in packages:
-            try:
-                cmd = [sys.executable, "-m", "pip", "install"]
-                if flags:
-                    cmd.extend(flags.split())
-                cmd.append(package)
-                
-                result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-                if result.returncode == 0:
-                    print(f"{Colors.GREEN}✅ Installed {package}{Colors.END}")
-                else:
-                    print(f"{Colors.YELLOW}⚠️ Failed to install {package}{Colors.END}")
-            except Exception as e:
-                print(f"{Colors.YELLOW}⚠️ Error installing {package}: {e}{Colors.END}")
-        
-        return True
-    except Exception as e:
-        print(f"{Colors.RED}❌ Error in simple installer: {e}{Colors.END}")
-        return False
+# Check for required dependencies
+PYTOSHOP_AVAILABLE = False
+try:
+    import pytoshop
+    PYTOSHOP_AVAILABLE = True
+    print(f"{Colors.GREEN}✅ pytoshop is available{Colors.END}")
+except ImportError:
+    PYTOSHOP_AVAILABLE = False
+    print(f"{Colors.YELLOW}⚠️ pytoshop not available{Colors.END}")
+except Exception as e:
+    PYTOSHOP_AVAILABLE = False
+    print(f"{Colors.RED}❌ Error checking pytoshop: {e}{Colors.END}")
 
-# Set up logging with console output
+# Auto-install dependencies if needed
+if not PYTOSHOP_AVAILABLE and AUTO_INSTALLER_AVAILABLE:
+    print(f"\n{Colors.ORANGE}--- Automatic Dependency Installation ---{Colors.END}")
+    print("Checking and installing dependencies automatically...")
+    try:
+        success = auto_install_dependencies(silent=False)
+        if success:
+            # Try importing pytoshop again
+            try:
+                import pytoshop
+                PYTOSHOP_AVAILABLE = True
+                print(f"{Colors.GREEN}✅ pytoshop is now available after installation{Colors.END}")
+            except ImportError:
+                print(f"{Colors.YELLOW}⚠️ pytoshop still not available after installation{Colors.END}")
+        else:
+            print(f"{Colors.YELLOW}⚠️ Some dependencies failed to install{Colors.END}")
+            print(f"{Colors.CYAN}   Manual installation: pip install -r requirements.txt{Colors.END}")
+    except Exception as e:
+        print(f"{Colors.RED}❌ Error during auto-installation: {e}{Colors.END}")
+        print(f"{Colors.CYAN}   Manual installation: pip install -r requirements.txt{Colors.END}")
+elif not PYTOSHOP_AVAILABLE:
+    print(f"{Colors.YELLOW}⚠️ pytoshop not available - PSD nodes will not be registered{Colors.END}")
+    print(f"{Colors.CYAN}   To install: pip install -r requirements.txt{Colors.END}")
+
+# Set up logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Add colorful console print statements for immediate visibility
-print(f"{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
-print(f"{Colors.ORANGE}{Colors.BOLD}APZmedia PSD Tools Extension - Starting Load Process{Colors.END}")
-print(f"{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
+# Initialize node mappings
+NODE_CLASS_MAPPINGS = {}
+NODE_DISPLAY_NAME_MAPPINGS = {}
 
-# Define the path to the current directory and subdirectories
-comfyui_texttools_path = os.path.dirname(os.path.realpath(__file__))
-nodes_path = os.path.join(comfyui_texttools_path, "nodes")
-utils_path = os.path.join(comfyui_texttools_path, "utils")
+# Extension paths
+extension_root = os.path.dirname(os.path.abspath(__file__))
+nodes_path = os.path.join(extension_root, "nodes")
+utils_path = os.path.join(extension_root, "utils")
 
-print(f"{Colors.CYAN}Extension directory: {Colors.WHITE}{comfyui_texttools_path}{Colors.END}")
-print(f"{Colors.CYAN}Nodes directory: {Colors.WHITE}{nodes_path}{Colors.END}")
-print(f"{Colors.CYAN}Utils directory: {Colors.WHITE}{utils_path}{Colors.END}")
+print(f"Extension directory: {extension_root}")
+print(f"Nodes directory: {nodes_path}")
+print(f"Utils directory: {utils_path}")
 
 # Check if directories exist
 if os.path.exists(nodes_path):
     print(f"{Colors.GREEN}✅ Nodes directory exists{Colors.END}")
 else:
-    print(f"{Colors.RED}❌ Nodes directory does not exist{Colors.END}")
+    print(f"{Colors.RED}❌ Nodes directory not found{Colors.END}")
 
 if os.path.exists(utils_path):
     print(f"{Colors.GREEN}✅ Utils directory exists{Colors.END}")
 else:
-    print(f"{Colors.RED}❌ Utils directory does not exist{Colors.END}")
+    print(f"{Colors.RED}❌ Utils directory not found{Colors.END}")
 
-# Ensure the paths are added to sys.path for importing custom nodes
+# Add paths to sys.path for imports
 if nodes_path not in sys.path:
-    sys.path.append(nodes_path)
-    print(f"{Colors.CYAN}Added nodes to sys.path: {Colors.WHITE}{nodes_path}{Colors.END}")
+    sys.path.insert(0, nodes_path)
+    print(f"Added nodes to sys.path: {nodes_path}")
 
 if utils_path not in sys.path:
-    sys.path.append(utils_path)
-    print(f"{Colors.CYAN}Added utils to sys.path: {Colors.WHITE}{utils_path}{Colors.END}")
+    sys.path.insert(0, utils_path)
+    print(f"Added utils to sys.path: {utils_path}")
 
-# Also add the main extension directory to sys.path
-if comfyui_texttools_path not in sys.path:
-    sys.path.append(comfyui_texttools_path)
-    print(f"{Colors.CYAN}Added extension to sys.path: {Colors.WHITE}{comfyui_texttools_path}{Colors.END}")
+if extension_root not in sys.path:
+    sys.path.insert(0, extension_root)
+    print(f"Added extension to sys.path: {extension_root}")
 
-# Automatic dependency installation
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Automatic Dependency Installation ---{Colors.END}")
-if AUTO_INSTALLER_AVAILABLE:
-    try:
-        print(f"{Colors.CYAN}Checking and installing dependencies automatically...{Colors.END}")
-        dependencies_ready = auto_install_dependencies(silent=False)
-        if dependencies_ready:
-            print(f"{Colors.GREEN}✅ All dependencies are ready!{Colors.END}")
-        else:
-            print(f"{Colors.YELLOW}⚠️ Some dependencies may not be available{Colors.END}")
-    except Exception as e:
-        print(f"{Colors.RED}❌ Error during automatic installation: {e}{Colors.END}")
-        logger.error("Error during automatic dependency installation", exc_info=True)
-else:
-    print(f"{Colors.YELLOW}⚠️ Auto-installer not available, using simple installer...{Colors.END}")
-    try:
-        simple_install_dependencies()
-    except Exception as e:
-        print(f"{Colors.RED}❌ Error in simple installer: {e}{Colors.END}")
-
-# Check if pytoshop is available (fallback check)
-try:
-    import pytoshop
-    print(f"{Colors.GREEN}✅ pytoshop is available{Colors.END}")
-except ImportError as e:
-    print(f"{Colors.RED}❌ pytoshop not available: {e}{Colors.END}")
-    print(f"{Colors.RED}   This will cause node import failures!{Colors.END}")
-    if AUTO_INSTALLER_AVAILABLE:
-        print(f"{Colors.YELLOW}   Attempting to install pytoshop...{Colors.END}")
-        try:
-            from auto_installer import get_installer
-            installer = get_installer()
-            success = installer.install_package("pytoshop", "pytoshop>=0.1.0", "-I --no-cache-dir")
-            if success:
-                print(f"{Colors.GREEN}✅ pytoshop installed successfully!{Colors.END}")
-            else:
-                print(f"{Colors.RED}❌ Failed to install pytoshop{Colors.END}")
-        except Exception as install_error:
-            print(f"{Colors.RED}❌ Error installing pytoshop: {install_error}{Colors.END}")
-
-# Function to ensure dependencies before node import
-def ensure_dependencies_for_nodes():
-    """Ensure all dependencies are available before importing nodes"""
-    if AUTO_INSTALLER_AVAILABLE:
-        try:
-            return ensure_dependencies()
-        except Exception as e:
-            print(f"{Colors.RED}❌ Error ensuring dependencies: {e}{Colors.END}")
-            return False
-    else:
-        # Fallback: check pytoshop manually
-        try:
-            import pytoshop
-            return True
-        except ImportError:
-            return False
-
-# Function to import node modules with multiple fallback methods
-def import_node_module(module_name, class_name, nodes_path):
-    """Import a node module using multiple fallback methods"""
-    print(f"{Colors.CYAN}Attempting to import {module_name}...{Colors.END}")
+# Only proceed with node registration if pytoshop is available
+if PYTOSHOP_AVAILABLE:
+    print(f"\n{Colors.ORANGE}--- Importing PSD Nodes ---{Colors.END}")
     
-    # Method 1: Try importing directly from file (most reliable)
+    # Import PSD nodes
     try:
-        import importlib.util
-        file_path = os.path.join(nodes_path, f"{module_name}.py")
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
-        
-        spec = importlib.util.spec_from_file_location(module_name, file_path)
-        if spec is None:
-            raise ImportError(f"Could not load spec for {module_name}")
-        
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        node_class = getattr(module, class_name)
-        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 1){Colors.END}")
-        return node_class
-    except (ImportError, AttributeError, FileNotFoundError) as e1:
-        print(f"{Colors.YELLOW}Method 1 failed: {e1}{Colors.END}")
-    
-    # Method 2: Try importing as module from nodes package
-    try:
-        import importlib
-        module = importlib.import_module(f"nodes.{module_name}")
-        node_class = getattr(module, class_name)
-        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 2){Colors.END}")
-        return node_class
-    except (ImportError, AttributeError) as e2:
-        print(f"{Colors.YELLOW}Method 2 failed: {e2}{Colors.END}")
-    
-    # Method 3: Try importing with exec (last resort)
-    try:
-        file_path = os.path.join(nodes_path, f"{module_name}.py")
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
-        
-        with open(file_path, 'r', encoding='utf-8') as f:
-            code = f.read()
-        
-        # Create a new module
-        module = importlib.util.module_from_spec(importlib.util.spec_from_loader(module_name, loader=None))
-        exec(code, module.__dict__)
-        
-        node_class = getattr(module, class_name)
-        print(f"{Colors.GREEN}✅ Successfully imported {class_name} (method 3){Colors.END}")
-        return node_class
-    except Exception as e3:
-        print(f"{Colors.RED}All import methods failed for {class_name}: {e3}{Colors.END}")
-        raise e3
-
-# Importing custom nodes
-APZmediaPSDLayerSaver = None
-APZmediaPSDLayerSaverAdvanced = None
-APZmediaPSDLayerSaver8Layers = None
-APZmediaPSDLayerSaver8LayersAdvanced = None
-
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver ---{Colors.END}")
-try:
-    # Ensure dependencies are available before importing
-    if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaver = import_node_module("apzPSDLayerSaver", "APZmediaPSDLayerSaver", nodes_path)
+        print("Attempting to import apzPSDLayerSaver...")
+        import nodes.apzPSDLayerSaver as psd_saver_module
+        APZmediaPSDLayerSaver = psd_saver_module.APZmediaPSDLayerSaver
+        APZmediaPSDLayerSaverAdvanced = psd_saver_module.APZmediaPSDLayerSaverAdvanced
+        print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver (method 1){Colors.END}")
         logger.info("Successfully imported APZmediaPSDLayerSaver node.")
-    else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaver node.")
-except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaver node.", exc_info=True)
+    except Exception as e:
+        print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver node: {e}{Colors.END}")
+        APZmediaPSDLayerSaver = None
+        APZmediaPSDLayerSaverAdvanced = None
 
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaverAdvanced ---{Colors.END}")
-try:
-    # Ensure dependencies are available before importing
-    if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaverAdvanced = import_node_module("apzPSDLayerSaver", "APZmediaPSDLayerSaverAdvanced", nodes_path)
-        logger.info("Successfully imported APZmediaPSDLayerSaverAdvanced node.")
-    else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaverAdvanced node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaverAdvanced node.")
-except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaverAdvanced node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaverAdvanced node.", exc_info=True)
-
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8Layers ---{Colors.END}")
-try:
-    # Ensure dependencies are available before importing
-    if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaver8Layers = import_node_module("apzPSDLayerSaver8Layers", "APZmediaPSDLayerSaver8Layers", nodes_path)
-        logger.info("Successfully imported APZmediaPSDLayerSaver8Layers node.")
-    else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver8Layers node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaver8Layers node.")
-except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver8Layers node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaver8Layers node.", exc_info=True)
-
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8LayersAdvanced ---{Colors.END}")
-try:
-    # Ensure dependencies are available before importing
-    if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaver8LayersAdvanced = import_node_module("apzPSDLayerSaver8Layers", "APZmediaPSDLayerSaver8LayersAdvanced", nodes_path)
-        logger.info("Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node.")
-    else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver8LayersAdvanced node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaver8LayersAdvanced node.")
-except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver8LayersAdvanced node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaver8LayersAdvanced node.", exc_info=True)
-
-# Utilities should be imported as needed, but not registered as nodes
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing PSD Utilities ---{Colors.END}")
-try:
-    # Try importing utilities with fallback methods
-    print(f"{Colors.CYAN}Attempting to import PSD utility modules...{Colors.END}")
-    
-    # Method 1: Try importing as modules
     try:
-        import utils.apz_psd_conversion as apz_psd_conversion
-        import utils.apz_psd_mask_utility as apz_psd_mask_utility
-        import utils.apz_image_conversion as apz_image_conversion
-        print(f"{Colors.GREEN}✅ Successfully imported PSD utility modules (method 1){Colors.END}")
-    except ImportError as e1:
-        print(f"{Colors.YELLOW}Method 1 failed: {e1}{Colors.END}")
-        
-        # Method 2: Try importing directly from files
-        try:
-            import importlib.util
-            
-            # Import apz_psd_conversion
-            spec1 = importlib.util.spec_from_file_location("apz_psd_conversion", os.path.join(utils_path, "apz_psd_conversion.py"))
-            apz_psd_conversion = importlib.util.module_from_spec(spec1)
-            spec1.loader.exec_module(apz_psd_conversion)
-            
-            # Import apz_psd_mask_utility
-            spec2 = importlib.util.spec_from_file_location("apz_psd_mask_utility", os.path.join(utils_path, "apz_psd_mask_utility.py"))
-            apz_psd_mask_utility = importlib.util.module_from_spec(spec2)
-            spec2.loader.exec_module(apz_psd_mask_utility)
-            
-            # Import apz_image_conversion
-            spec3 = importlib.util.spec_from_file_location("apz_image_conversion", os.path.join(utils_path, "apz_image_conversion.py"))
-            apz_image_conversion = importlib.util.module_from_spec(spec3)
-            spec3.loader.exec_module(apz_image_conversion)
-            
-            print(f"{Colors.GREEN}✅ Successfully imported PSD utility modules (method 2){Colors.END}")
-        except Exception as e2:
-            print(f"{Colors.YELLOW}Method 2 failed: {e2}{Colors.END}")
-            print(f"{Colors.YELLOW}⚠️ PSD utility modules not available, but nodes may still work{Colors.END}")
-    
-    logger.info("Successfully imported PSD utility modules.")
-except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import PSD utility modules: {e}{Colors.END}")
-    logger.error("Failed to import PSD utility modules.", exc_info=True)
+        print("Attempting to import apzPSDLayerSaver8Layers...")
+        import nodes.apzPSDLayerSaver8Layers as psd_8layer_module
+        APZmediaPSDLayerSaver8Layers = psd_8layer_module.APZmediaPSDLayerSaver8Layers
+        APZmediaPSDLayerSaver8LayersAdvanced = psd_8layer_module.APZmediaPSDLayerSaver8LayersAdvanced
+        print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver8Layers (method 1){Colors.END}")
+        logger.info("Successfully imported APZmediaPSDLayerSaver8Layers node.")
+    except Exception as e:
+        print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver8Layers node: {e}{Colors.END}")
+        APZmediaPSDLayerSaver8Layers = None
+        APZmediaPSDLayerSaver8LayersAdvanced = None
 
-# Build node mappings only for successfully imported nodes
-NODE_CLASS_MAPPINGS = {}
-NODE_DISPLAY_NAME_MAPPINGS = {}
+    # Register nodes if successfully imported
+    if APZmediaPSDLayerSaver is not None:
+        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = APZmediaPSDLayerSaver
+        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver"] = "APZmedia PSD Layer Saver"
 
-if APZmediaPSDLayerSaver is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = APZmediaPSDLayerSaver
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver"] = "APZmedia PSD Layer Saver"
+    if APZmediaPSDLayerSaverAdvanced is not None:
+        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = APZmediaPSDLayerSaverAdvanced
+        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = "APZmedia PSD Layer Saver Advanced"
 
-if APZmediaPSDLayerSaverAdvanced is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = APZmediaPSDLayerSaverAdvanced
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = "APZmedia PSD Layer Saver Advanced"
+    if APZmediaPSDLayerSaver8Layers is not None:
+        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = APZmediaPSDLayerSaver8Layers
+        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = "APZmedia PSD Layer Saver (8 Layers)"
 
-if APZmediaPSDLayerSaver8Layers is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = APZmediaPSDLayerSaver8Layers
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = "APZmedia PSD Layer Saver (8 Layers)"
+    if APZmediaPSDLayerSaver8LayersAdvanced is not None:
+        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = APZmediaPSDLayerSaver8LayersAdvanced
+        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = "APZmedia PSD Layer Saver (8 Layers Advanced)"
 
-if APZmediaPSDLayerSaver8LayersAdvanced is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = APZmediaPSDLayerSaver8LayersAdvanced
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = "APZmedia PSD Layer Saver (8 Layers Advanced)"
-
-__all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
-
-# Additional setup, such as threading or other initializations, can be added here if necessary
+else:
+    print(f"\n{Colors.YELLOW}--- Skipping Node Registration (pytoshop not available) ---{Colors.END}")
+    print(f"{Colors.CYAN}   Install dependencies and restart ComfyUI to enable PSD nodes{Colors.END}")
 
 # Final summary
-print(f"\n{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
-print(f"{Colors.ORANGE}{Colors.BOLD}APZmedia PSD Tools Extension - Load Complete{Colors.END}")
-print(f"{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
+print(f"\n{Colors.ORANGE}{'='*60}{Colors.END}")
+print(f"{Colors.ORANGE}APZmedia PSD Tools Extension - Load Complete{Colors.END}")
+print(f"{Colors.ORANGE}{'='*60}{Colors.END}")
 
-successful_nodes = len(NODE_CLASS_MAPPINGS)
-total_nodes = 4
-
-if successful_nodes == total_nodes:
-    print(f"{Colors.GREEN}🎉 SUCCESS: All {successful_nodes}/{total_nodes} nodes loaded successfully!{Colors.END}")
-else:
-    print(f"{Colors.YELLOW}⚠️  PARTIAL: {successful_nodes}/{total_nodes} nodes loaded successfully{Colors.END}")
-
-print(f"{Colors.CYAN}Registered nodes: {Colors.WHITE}{list(NODE_CLASS_MAPPINGS.keys())}{Colors.END}")
-print(f"{Colors.CYAN}Node display names: {Colors.WHITE}{list(NODE_DISPLAY_NAME_MAPPINGS.keys())}{Colors.END}")
-
-# Show dependency installation status
-if AUTO_INSTALLER_AVAILABLE:
-    print(f"{Colors.GREEN}✅ Automatic dependency installation is enabled{Colors.END}")
-    print(f"{Colors.CYAN}   Dependencies will be installed automatically when needed{Colors.END}")
-else:
-    print(f"{Colors.YELLOW}⚠️  Automatic dependency installation is not available{Colors.END}")
-    print(f"{Colors.CYAN}   Manual installation may be required{Colors.END}")
-
-if successful_nodes > 0:
+if NODE_CLASS_MAPPINGS:
+    print(f"{Colors.GREEN}🎉 SUCCESS: {len(NODE_CLASS_MAPPINGS)}/{len(NODE_CLASS_MAPPINGS)} nodes loaded successfully!{Colors.END}")
+    print(f"Registered nodes: {list(NODE_CLASS_MAPPINGS.keys())}")
+    print(f"Node display names: {list(NODE_DISPLAY_NAME_MAPPINGS.values())}")
     print(f"{Colors.GREEN}✅ Look for PSD nodes in ComfyUI under: image/psd{Colors.END}")
     print(f"{Colors.GREEN}✅ Or search for: 'APZmedia' or 'PSD'{Colors.END}")
-    print(f"{Colors.GREEN}✅ Dependencies are automatically managed{Colors.END}")
 else:
-    print(f"{Colors.RED}❌ No nodes were loaded. Check the errors above.{Colors.END}")
-    if AUTO_INSTALLER_AVAILABLE:
-        print(f"{Colors.YELLOW}   Try restarting ComfyUI to trigger dependency installation{Colors.END}")
+    print(f"{Colors.YELLOW}⚠️ No nodes were loaded{Colors.END}")
+    print(f"{Colors.CYAN}   Install dependencies: pip install pytoshop psd-tools{Colors.END}")
 
-print(f"{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
+print(f"{Colors.ORANGE}{'='*60}{Colors.END}")
 
 logger.info("ComfyUI PSD Tools extension has been loaded successfully.")
-logger.info(f"Registered {len(NODE_CLASS_MAPPINGS)} nodes: {list(NODE_CLASS_MAPPINGS.keys())}")
-logger.info(f"Node display names: {list(NODE_DISPLAY_NAME_MAPPINGS.keys())}")
+if NODE_CLASS_MAPPINGS:
+    logger.info(f"Registered {len(NODE_CLASS_MAPPINGS)} nodes: {list(NODE_CLASS_MAPPINGS.keys())}")
+    logger.info(f"Node display names: {list(NODE_DISPLAY_NAME_MAPPINGS.values())}")
+else:
+    logger.info("No nodes registered - dependencies not available")

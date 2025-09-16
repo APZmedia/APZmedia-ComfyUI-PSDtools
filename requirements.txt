@@ -1,5 +1,13 @@
-pytoshop
+# ComfyUI PSD Tools Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core PSD libraries
+pytoshop>=0.1.0
 psd-tools
+
+# Image processing
 Pillow>=8.0.0
+
+# ComfyUI dependencies (usually already installed)
 torch>=1.7.0
 numpy>=1.19.0

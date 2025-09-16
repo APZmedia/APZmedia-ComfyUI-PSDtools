@@ -42,6 +42,10 @@ except ImportError as e:
     class PSDMaskUtility:
         def __init__(self, *args, **kwargs):
             raise ImportError("PSD utilities not available")
+        
+        @staticmethod
+        def process_mask_for_psd(*args, **kwargs):
+            raise ImportError("PSD utilities not available")
 
 
 class APZmediaPSDLayerSaver8Layers:
