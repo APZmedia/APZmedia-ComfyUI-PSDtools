@@ -148,7 +148,7 @@ def create_psd_layer(image_data: np.ndarray,
 def create_psd_from_layers(layers: List,
                           color_mode: str = "rgb",
                           width: Optional[int] = None,
-                          height: Optional[int] = None) -> pytoshop.Psd:
+                          height: Optional[int] = None):
     """
     Creates a PSD file from a list of layers.
     
@@ -170,7 +170,7 @@ def create_psd_from_layers(layers: List,
     return psd
 
 
-def save_psd_file(psd: pytoshop.Psd, filepath: str) -> bool:
+def save_psd_file(psd, filepath: str) -> bool:
     """
     Saves a PSD object to a file.
     
