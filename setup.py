@@ -42,7 +42,8 @@ try:
         url='https://github.com/APZmedia/comfyui-psdtools',
         packages=find_packages(),
         install_requires=[
-            'pytoshop>=0.1.0',
+            'pytoshop',
+            'psd-tools',
             'Pillow>=8.0.0',
             'torch>=1.7.0',
             'numpy>=1.19.0',

@@ -9,10 +9,27 @@ import torch
 import numpy as np
 from PIL import Image
 from typing import List, Tuple, Optional, Union
-import pytoshop
-from pytoshop import enums
-from pytoshop.user import nested_layers
 
+# Import pytoshop only when needed to avoid import errors
+try:
+    import pytoshop
+    from pytoshop import enums
+    from pytoshop.user import nested_layers
+    PYTOSHOP_AVAILABLE = True
+except ImportError:
+    PYTOSHOP_AVAILABLE = False
+    pytoshop = None
+    enums = None
+    nested_layers = None
+
+
+def check_pytoshop_available():
+    """Check if pytoshop is available and raise an error if not"""
+    if not PYTOSHOP_AVAILABLE:
+        raise ImportError(
+            "pytoshop is not installed. Please install it with: pip install pytoshop>=0.1.0\n"
+            "Or run the installation script: python install_dependencies.py"
+        )
 
 def tensor_to_numpy_array(image_tensor: torch.Tensor) -> np.ndarray:
     """
@@ -109,6 +126,7 @@ def create_psd_layer(image_data: np.ndarray,
     Returns:
         pytoshop nested_layers.Layer object
     """
+    check_pytoshop_available()
     # Convert blend mode string to enum
     blend_mode_enum = getattr(enums.BlendMode, blend_mode.lower(), enums.BlendMode.normal)
     

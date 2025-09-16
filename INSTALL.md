@@ -2,51 +2,45 @@
 
 ## Automatic Installation (Recommended)
 
-The extension is designed to install dependencies automatically. Follow these steps:
+The extension includes a complete setup script that handles everything automatically.
 
-### Method 1: Direct pip installation
-
-1. **Navigate to the extension directory:**
-   ```bash
-   cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
-   ```
-
-2. **Install with automatic dependencies:**
-   ```bash
-   pip install -e .
-   ```
-
-3. **Restart ComfyUI**
-
-### Method 2: Copy and install
+### Complete Setup (Recommended)
 
 1. **Copy the extension to ComfyUI:**
    ```
    ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
    ```
 
-2. **Install dependencies:**
+2. **Run the complete setup script:**
    ```bash
    cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
-   pip install -e .
+   python setup_extension.py
    ```
 
 3. **Restart ComfyUI**
 
-### Method 3: Using the installation script
+The setup script will:
+- ✅ Install all required dependencies (pytoshop, Pillow, torch, numpy)
+- ✅ Validate that all packages are properly installed
+- ✅ Test the PSD functionality
+- ✅ Provide clear feedback on success/failure
+- ✅ Handle permission issues automatically
 
-1. **Copy the extension to ComfyUI:**
-   ```
-   ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
-   ```
+### Alternative Methods
 
-2. **Run the installation script:**
-   ```bash
-   cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
-   python install_dependencies.py
-   ```
+If the complete setup script doesn't work, you can try:
 
-3. **Restart ComfyUI**
+**Method 1: Direct pip installation**
+```bash
+cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
+pip install -e .
+```
+
+**Method 2: Individual dependency installation**
+```bash
+cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
+python install_dependencies.py
+```
 
 ## Manual Installation (if automatic fails)
 

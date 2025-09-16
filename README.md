@@ -32,33 +32,43 @@ ComfyUI-APZmedia-PSDtools includes custom nodes for:
 
 ### Automatic Installation (Recommended)
 
-1. **Install via pip** (dependencies will be installed automatically):
-   ```bash
-   pip install -e .
+1. **Copy to ComfyUI custom nodes directory:**
+   ```
+   ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
    ```
 
-2. **Or use the installation script:**
+2. **Run the installation script:**
    ```bash
-   python install_dependencies.py
+   cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
+   python install.py
    ```
 
-3. **Or copy to ComfyUI custom nodes directory:**
-   - Copy this repository to `ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/`
-   - Run `pip install -e .` from the extension directory to install dependencies
-   - Restart ComfyUI
+3. **Restart ComfyUI**
+
+The installation script will:
+- Install pytoshop with proper flags (`-I --no-cache-dir`)
+- Install psd-tools with no dependencies (`--no-deps`)
+- Install other required packages (Pillow, torch, numpy)
+- Provide clear feedback on success/failure
+
+**Note:** This approach is based on the proven method from [ComfyUI-Layers](https://github.com/alessandrozonta/ComfyUI-Layers).
 
 ### Manual Installation (if automatic fails)
 
 If the automatic dependency installation doesn't work, you can install dependencies manually:
 
-**Standard installation:**
+**Standard installation (based on ComfyUI-Layers approach):**
 ```bash
-pip install pytoshop>=0.1.0 Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
+pip install pytoshop -I --no-cache-dir
+pip install psd-tools --no-deps
+pip install Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
 ```
 
 **If you encounter permission issues, use the --user flag:**
 ```bash
-pip install --user pytoshop>=0.1.0 Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
+pip install --user pytoshop -I --no-cache-dir
+pip install --user psd-tools --no-deps
+pip install --user Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
 ```
 
 ### Verify Installation
