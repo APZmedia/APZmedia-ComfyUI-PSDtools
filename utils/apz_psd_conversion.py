@@ -112,7 +112,7 @@ def create_psd_layer(image_data: np.ndarray,
                     layer_name: str,
                     mask_data: Optional[np.ndarray] = None,
                     opacity: int = 255,
-                    blend_mode: str = "normal") -> nested_layers.Layer:
+                    blend_mode: str = "normal"):
     """
     Creates a PSD layer from image and optional mask data.
     
@@ -145,7 +145,7 @@ def create_psd_layer(image_data: np.ndarray,
     return layer
 
 
-def create_psd_from_layers(layers: List[nested_layers.Layer],
+def create_psd_from_layers(layers: List,
                           color_mode: str = "rgb",
                           width: Optional[int] = None,
                           height: Optional[int] = None) -> pytoshop.Psd:
@@ -194,7 +194,7 @@ def batch_tensors_to_psd_layers(image_tensors: List[torch.Tensor],
                                layer_names: List[str],
                                mask_tensors: Optional[List[torch.Tensor]] = None,
                                opacities: Optional[List[int]] = None,
-                               blend_modes: Optional[List[str]] = None) -> List[nested_layers.Layer]:
+                               blend_modes: Optional[List[str]] = None) -> List:
     """
     Converts a batch of image tensors to PSD layers.
     
@@ -243,7 +243,7 @@ def batch_tensors_to_psd_layers(image_tensors: List[torch.Tensor],
     return layers
 
 
-def validate_layer_dimensions(layers: List[nested_layers.Layer]) -> Tuple[bool, str]:
+def validate_layer_dimensions(layers: List) -> Tuple[bool, str]:
     """
     Validates that all layers have compatible dimensions.
     
