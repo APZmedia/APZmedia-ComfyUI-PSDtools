@@ -65,7 +65,9 @@ APZmediaPSDLayerSaver8LayersAdvanced = None
 
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver ---{Colors.END}")
 try:
-    from nodes.apzPSDLayerSaver import APZmediaPSDLayerSaver
+    # Import directly from file to avoid package conflicts
+    import nodes.apzPSDLayerSaver as psd_saver_module
+    APZmediaPSDLayerSaver = psd_saver_module.APZmediaPSDLayerSaver
     print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver node{Colors.END}")
     logger.info("Successfully imported APZmediaPSDLayerSaver node.")
 except Exception as e:
@@ -74,7 +76,9 @@ except Exception as e:
 
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaverAdvanced ---{Colors.END}")
 try:
-    from nodes.apzPSDLayerSaver import APZmediaPSDLayerSaverAdvanced
+    # Import directly from file to avoid package conflicts
+    import nodes.apzPSDLayerSaver as psd_saver_module
+    APZmediaPSDLayerSaverAdvanced = psd_saver_module.APZmediaPSDLayerSaverAdvanced
     print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaverAdvanced node{Colors.END}")
     logger.info("Successfully imported APZmediaPSDLayerSaverAdvanced node.")
 except Exception as e:
@@ -83,7 +87,9 @@ except Exception as e:
 
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8Layers ---{Colors.END}")
 try:
-    from nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8Layers
+    # Import directly from file to avoid package conflicts
+    import nodes.apzPSDLayerSaver8Layers as psd_8layers_module
+    APZmediaPSDLayerSaver8Layers = psd_8layers_module.APZmediaPSDLayerSaver8Layers
     print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver8Layers node{Colors.END}")
     logger.info("Successfully imported APZmediaPSDLayerSaver8Layers node.")
 except Exception as e:
@@ -92,7 +98,9 @@ except Exception as e:
 
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8LayersAdvanced ---{Colors.END}")
 try:
-    from nodes.apzPSDLayerSaver8Layers import APZmediaPSDLayerSaver8LayersAdvanced
+    # Import directly from file to avoid package conflicts
+    import nodes.apzPSDLayerSaver8Layers as psd_8layers_module
+    APZmediaPSDLayerSaver8LayersAdvanced = psd_8layers_module.APZmediaPSDLayerSaver8LayersAdvanced
     print(f"{Colors.GREEN}✅ Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node{Colors.END}")
     logger.info("Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node.")
 except Exception as e:
@@ -102,9 +110,10 @@ except Exception as e:
 # Utilities should be imported as needed, but not registered as nodes
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing PSD Utilities ---{Colors.END}")
 try:
-    from utils import apz_psd_conversion
-    from utils import apz_psd_mask_utility
-    from utils import apz_image_conversion
+    # Import utilities directly from files to avoid conflicts with ComfyUI's utils
+    import utils.apz_psd_conversion as apz_psd_conversion
+    import utils.apz_psd_mask_utility as apz_psd_mask_utility
+    import utils.apz_image_conversion as apz_image_conversion
     print(f"{Colors.GREEN}✅ Successfully imported PSD utility modules{Colors.END}")
     logger.info("Successfully imported PSD utility modules.")
 except Exception as e:

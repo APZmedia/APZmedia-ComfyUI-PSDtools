@@ -37,10 +37,10 @@ ComfyUI-APZmedia-PSDtools includes custom nodes for:
    ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
    ```
 
-2. **Run the installation script:**
+2. **Install dependencies in ComfyUI environment:**
    ```bash
    cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
-   python install.py
+   python install_for_comfyui.py
    ```
 
 3. **Restart ComfyUI**
@@ -52,6 +52,22 @@ The installation script will:
 - Provide clear feedback on success/failure
 
 **Note:** This approach is based on the proven method from [ComfyUI-Layers](https://github.com/alessandrozonta/ComfyUI-Layers).
+
+### Alternative: Install from ComfyUI Directory
+
+If the above doesn't work, try installing from the ComfyUI root directory:
+
+1. **Navigate to ComfyUI root:**
+   ```bash
+   cd ComfyUI/
+   ```
+
+2. **Run the ComfyUI-specific installer:**
+   ```bash
+   python custom_nodes/APZmedia-ComfyUI-PSDtools/install_for_comfyui.py
+   ```
+
+3. **Restart ComfyUI**
 
 ### Manual Installation (if automatic fails)
 
