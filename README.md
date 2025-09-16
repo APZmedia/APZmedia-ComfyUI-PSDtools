@@ -27,25 +27,58 @@ ComfyUI-APZmedia-PSDtools includes custom nodes for:
 - **Automatic Dimension Validation**: Ensures all layers have compatible dimensions
 - **Error Handling**: Comprehensive error handling with detailed feedback
 - **Batch Processing**: Process multiple images and masks in a single operation
+- **Automatic Dependency Management**: Dependencies are installed automatically when needed
+- **Smart Installation**: Detects missing packages and installs them without user intervention
+- **Installation Feedback**: Clear console output showing installation progress and status
 
 ## Installation
 
-### Automatic Installation (Recommended)
+### Automatic Dependency Installation (Recommended)
+
+**🎉 NEW: Dependencies are now installed automatically!**
+
+The extension now includes automatic dependency installation that runs when ComfyUI loads the extension. No manual installation required!
 
 1. **Copy to ComfyUI custom nodes directory:**
    ```
    ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
    ```
 
-2. **Install dependencies in ComfyUI environment:**
+2. **Restart ComfyUI**
+
+The extension will automatically:
+- ✅ Check for missing dependencies
+- ✅ Install pytoshop with proper flags (`-I --no-cache-dir`)
+- ✅ Install psd-tools with no dependencies (`--no-deps`)
+- ✅ Install other required packages (Pillow, torch, numpy)
+- ✅ Provide clear feedback on installation progress
+- ✅ Verify all dependencies are working
+
+**What you'll see in the console:**
+```
+APZmedia PSD Tools Extension - Starting Load Process
+============================================================
+--- Automatic Dependency Installation ---
+[INFO] Checking and installing dependencies automatically...
+[INFO] Installing pytoshop>=0.1.0...
+[SUCCESS] Successfully installed pytoshop>=0.1.0
+[SUCCESS] 🎉 All dependencies are ready!
+✅ Automatic dependency installation is enabled
+```
+
+### Manual Installation (Fallback)
+
+If automatic installation fails, you can still install dependencies manually:
+
+1. **Install dependencies in ComfyUI environment:**
    ```bash
    cd ComfyUI/custom_nodes/APZmedia-ComfyUI-PSDtools/
    python install_for_comfyui.py
    ```
 
-3. **Restart ComfyUI**
+2. **Restart ComfyUI**
 
-The installation script will:
+The manual installation script will:
 - Install pytoshop with proper flags (`-I --no-cache-dir`)
 - Install psd-tools with no dependencies (`--no-deps`)
 - Install other required packages (Pillow, torch, numpy)
@@ -96,6 +129,32 @@ After installation, you should see the PSD nodes in the `image/psd` category:
 - APZmedia PSD Layer Saver (8 Layers Advanced)
 
 ### Troubleshooting
+
+#### Automatic Installation Issues
+
+If automatic dependency installation fails:
+
+1. **Check Console Output**: Look for error messages in the ComfyUI console
+2. **Try Manual Installation**: Use the manual installation scripts as fallback
+3. **Check Permissions**: Ensure ComfyUI has permission to install packages
+4. **Check Internet Connection**: Automatic installation requires internet access
+5. **Restart ComfyUI**: Sometimes a restart helps with dependency loading
+
+#### Common Issues
+
+**"Auto-installer not available"**
+- This is normal if the auto_installer.py file is missing
+- Use manual installation scripts instead
+
+**"Dependencies not available for node"**
+- Automatic installation may have failed
+- Check console for specific error messages
+- Try manual installation
+
+**"Failed to install [package]"**
+- Check internet connection
+- Try manual installation with different flags
+- Check ComfyUI Python environment
 
 If nodes don't appear, check the ComfyUI console for error messages. See [INSTALL.md](INSTALL.md) for detailed troubleshooting.
 
@@ -363,6 +422,13 @@ Contributions are welcome! Please feel free to submit issues, feature requests, 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Changelog
+
+### Version 0.2.1
+- **NEW: Automatic Dependency Installation**: Dependencies are now installed automatically when the extension loads
+- **Smart Installation**: Detects missing packages and installs them without user intervention
+- **Installation Feedback**: Clear console output showing installation progress and status
+- **Fallback Support**: Manual installation scripts still available as backup
+- **Enhanced Error Handling**: Better error messages and troubleshooting guidance
 
 ### Version 0.2.0
 - Complete refactor from text overlay functionality to PSD layer saving

@@ -33,8 +33,8 @@ try:
     # Proceed with setup
     setup(
         name='ComfyUI-APZmedia-PSDtools',
-        version='0.2.0',
-        description='Nodes for saving images as PSD layers with masks in ComfyUI.',
+        version='0.2.1',
+        description='Nodes for saving images as PSD layers with masks in ComfyUI. Features automatic dependency installation.',
         long_description=long_description,
         long_description_content_type='text/markdown',
         author='Pablo Apiolazza',
