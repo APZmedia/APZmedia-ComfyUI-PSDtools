@@ -64,34 +64,52 @@ class APZmediaPSDLayerSaver8Layers:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image_1": ("IMAGE",),
-                "image_2": ("IMAGE",),
-                "image_3": ("IMAGE",),
-                "image_4": ("IMAGE",),
-                "image_5": ("IMAGE",),
-                "image_6": ("IMAGE",),
-                "image_7": ("IMAGE",),
-                "image_8": ("IMAGE",),
-                "layer_name_1": ("STRING", {"default": "Layer 1"}),
-                "layer_name_2": ("STRING", {"default": "Layer 2"}),
-                "layer_name_3": ("STRING", {"default": "Layer 3"}),
-                "layer_name_4": ("STRING", {"default": "Layer 4"}),
-                "layer_name_5": ("STRING", {"default": "Layer 5"}),
-                "layer_name_6": ("STRING", {"default": "Layer 6"}),
-                "layer_name_7": ("STRING", {"default": "Layer 7"}),
-                "layer_name_8": ("STRING", {"default": "Layer 8"}),
+                # Global Settings
                 "psd_filename": ("STRING", {"default": "output.psd"}),
                 "color_mode": (cls._color_modes, {"default": "rgb"}),
             },
             "optional": {
+                # Layer 1 Group
+                "image_1": ("IMAGE",),
                 "mask_1": ("MASK",),
+                "layer_name_1": ("STRING", {"default": "Background"}),
+                
+                # Layer 2 Group
+                "image_2": ("IMAGE",),
                 "mask_2": ("MASK",),
+                "layer_name_2": ("STRING", {"default": "Character"}),
+                
+                # Layer 3 Group
+                "image_3": ("IMAGE",),
                 "mask_3": ("MASK",),
+                "layer_name_3": ("STRING", {"default": "Hair"}),
+                
+                # Layer 4 Group
+                "image_4": ("IMAGE",),
                 "mask_4": ("MASK",),
+                "layer_name_4": ("STRING", {"default": "Clothing"}),
+                
+                # Layer 5 Group
+                "image_5": ("IMAGE",),
                 "mask_5": ("MASK",),
+                "layer_name_5": ("STRING", {"default": "Accessories"}),
+                
+                # Layer 6 Group
+                "image_6": ("IMAGE",),
                 "mask_6": ("MASK",),
+                "layer_name_6": ("STRING", {"default": "Effects"}),
+                
+                # Layer 7 Group
+                "image_7": ("IMAGE",),
                 "mask_7": ("MASK",),
+                "layer_name_7": ("STRING", {"default": "Lighting"}),
+                
+                # Layer 8 Group
+                "image_8": ("IMAGE",),
                 "mask_8": ("MASK",),
+                "layer_name_8": ("STRING", {"default": "Overlay"}),
+                
+                # Layer Properties
                 "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
                 "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
                 "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
@@ -108,6 +126,8 @@ class APZmediaPSDLayerSaver8Layers:
                 "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
                 "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
                 "blend_mode_8": (cls._blend_modes, {"default": "normal"}),
+                
+                # Background Layer Settings
                 "create_background_layer": (["true", "false"], {"default": "false"}),
                 "background_color": ("STRING", {"default": "#FFFFFF"}),
                 "background_opacity": ("INT", {"default": 255, "min": 0, "max": 255}),
@@ -120,13 +140,25 @@ class APZmediaPSDLayerSaver8Layers:
     CATEGORY = "image/psd"
     
     def save_8_layers_psd(self, 
-                         image_1, image_2, image_3, image_4, 
-                         image_5, image_6, image_7, image_8,
-                         layer_name_1, layer_name_2, layer_name_3, layer_name_4,
-                         layer_name_5, layer_name_6, layer_name_7, layer_name_8,
+                         # Global Settings
                          psd_filename, color_mode="rgb",
-                         mask_1=None, mask_2=None, mask_3=None, mask_4=None,
-                         mask_5=None, mask_6=None, mask_7=None, mask_8=None,
+                         # Layer 1 Group
+                         image_1=None, mask_1=None, layer_name_1="Background",
+                         # Layer 2 Group
+                         image_2=None, mask_2=None, layer_name_2="Character",
+                         # Layer 3 Group
+                         image_3=None, mask_3=None, layer_name_3="Hair",
+                         # Layer 4 Group
+                         image_4=None, mask_4=None, layer_name_4="Clothing",
+                         # Layer 5 Group
+                         image_5=None, mask_5=None, layer_name_5="Accessories",
+                         # Layer 6 Group
+                         image_6=None, mask_6=None, layer_name_6="Effects",
+                         # Layer 7 Group
+                         image_7=None, mask_7=None, layer_name_7="Lighting",
+                         # Layer 8 Group
+                         image_8=None, mask_8=None, layer_name_8="Overlay",
+                         # Optional Layer Properties
                          opacity_1=255, opacity_2=255, opacity_3=255, opacity_4=255,
                          opacity_5=255, opacity_6=255, opacity_7=255, opacity_8=255,
                          blend_mode_1="normal", blend_mode_2="normal", blend_mode_3="normal", blend_mode_4="normal",
@@ -174,6 +206,10 @@ class APZmediaPSDLayerSaver8Layers:
             # Create PSD layers
             layers = []
             for i in range(8):
+                # Skip if no image provided
+                if images[i] is None:
+                    continue
+                    
                 # Convert image tensor to numpy array
                 image_data = tensor_to_numpy_array(images[i])
                 
@@ -193,9 +229,18 @@ class APZmediaPSDLayerSaver8Layers:
             
             # Add background layer if requested
             if create_background_layer == "true":
-                # Get image dimensions from first layer
-                first_image = tensor_to_numpy_array(images[0])
-                height, width = first_image.shape[:2]
+                # Get image dimensions from first available layer
+                first_image = None
+                for img in images:
+                    if img is not None:
+                        first_image = tensor_to_numpy_array(img)
+                        break
+                
+                if first_image is not None:
+                    height, width = first_image.shape[:2]
+                else:
+                    # Default dimensions if no images provided
+                    height, width = 512, 512
                 
                 # Create background layer
                 background_data = self._create_background_layer(
@@ -294,35 +339,53 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "image_1": ("IMAGE",),
-                "image_2": ("IMAGE",),
-                "image_3": ("IMAGE",),
-                "image_4": ("IMAGE",),
-                "image_5": ("IMAGE",),
-                "image_6": ("IMAGE",),
-                "image_7": ("IMAGE",),
-                "image_8": ("IMAGE",),
-                "layer_name_1": ("STRING", {"default": "Layer 1"}),
-                "layer_name_2": ("STRING", {"default": "Layer 2"}),
-                "layer_name_3": ("STRING", {"default": "Layer 3"}),
-                "layer_name_4": ("STRING", {"default": "Layer 4"}),
-                "layer_name_5": ("STRING", {"default": "Layer 5"}),
-                "layer_name_6": ("STRING", {"default": "Layer 6"}),
-                "layer_name_7": ("STRING", {"default": "Layer 7"}),
-                "layer_name_8": ("STRING", {"default": "Layer 8"}),
+                # Global Settings
                 "psd_filename": ("STRING", {"default": "output.psd"}),
                 "color_mode": (cls._color_modes, {"default": "rgb"}),
                 "create_background_layer": (["true", "false"], {"default": "true"}),
             },
             "optional": {
+                # Layer 1 Group
+                "image_1": ("IMAGE",),
                 "mask_1": ("MASK",),
+                "layer_name_1": ("STRING", {"default": "Background"}),
+                
+                # Layer 2 Group
+                "image_2": ("IMAGE",),
                 "mask_2": ("MASK",),
+                "layer_name_2": ("STRING", {"default": "Character"}),
+                
+                # Layer 3 Group
+                "image_3": ("IMAGE",),
                 "mask_3": ("MASK",),
+                "layer_name_3": ("STRING", {"default": "Hair"}),
+                
+                # Layer 4 Group
+                "image_4": ("IMAGE",),
                 "mask_4": ("MASK",),
+                "layer_name_4": ("STRING", {"default": "Clothing"}),
+                
+                # Layer 5 Group
+                "image_5": ("IMAGE",),
                 "mask_5": ("MASK",),
+                "layer_name_5": ("STRING", {"default": "Accessories"}),
+                
+                # Layer 6 Group
+                "image_6": ("IMAGE",),
                 "mask_6": ("MASK",),
+                "layer_name_6": ("STRING", {"default": "Effects"}),
+                
+                # Layer 7 Group
+                "image_7": ("IMAGE",),
                 "mask_7": ("MASK",),
+                "layer_name_7": ("STRING", {"default": "Lighting"}),
+                
+                # Layer 8 Group
+                "image_8": ("IMAGE",),
                 "mask_8": ("MASK",),
+                "layer_name_8": ("STRING", {"default": "Overlay"}),
+                
+                # Layer Properties
                 "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
                 "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
                 "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
@@ -339,8 +402,12 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
                 "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
                 "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
                 "blend_mode_8": (cls._blend_modes, {"default": "normal"}),
+                
+                # Background Layer Settings
                 "background_color": ("STRING", {"default": "#FFFFFF"}),
                 "background_opacity": ("INT", {"default": 255, "min": 0, "max": 255}),
+                
+                # Layer Offsets
                 "offset_x_1": ("INT", {"default": 0}),
                 "offset_y_1": ("INT", {"default": 0}),
                 "offset_x_2": ("INT", {"default": 0}),
@@ -366,18 +433,31 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
     CATEGORY = "image/psd"
     
     def save_8_layers_psd_advanced(self, 
-                                  image_1, image_2, image_3, image_4, 
-                                  image_5, image_6, image_7, image_8,
-                                  layer_name_1, layer_name_2, layer_name_3, layer_name_4,
-                                  layer_name_5, layer_name_6, layer_name_7, layer_name_8,
+                                  # Global Settings
                                   psd_filename, color_mode="rgb", create_background_layer="true",
-                                  mask_1=None, mask_2=None, mask_3=None, mask_4=None,
-                                  mask_5=None, mask_6=None, mask_7=None, mask_8=None,
+                                  # Layer 1 Group
+                                  image_1=None, mask_1=None, layer_name_1="Background",
+                                  # Layer 2 Group
+                                  image_2=None, mask_2=None, layer_name_2="Character",
+                                  # Layer 3 Group
+                                  image_3=None, mask_3=None, layer_name_3="Hair",
+                                  # Layer 4 Group
+                                  image_4=None, mask_4=None, layer_name_4="Clothing",
+                                  # Layer 5 Group
+                                  image_5=None, mask_5=None, layer_name_5="Accessories",
+                                  # Layer 6 Group
+                                  image_6=None, mask_6=None, layer_name_6="Effects",
+                                  # Layer 7 Group
+                                  image_7=None, mask_7=None, layer_name_7="Lighting",
+                                  # Layer 8 Group
+                                  image_8=None, mask_8=None, layer_name_8="Overlay",
+                                  # Optional Layer Properties
                                   opacity_1=255, opacity_2=255, opacity_3=255, opacity_4=255,
                                   opacity_5=255, opacity_6=255, opacity_7=255, opacity_8=255,
                                   blend_mode_1="normal", blend_mode_2="normal", blend_mode_3="normal", blend_mode_4="normal",
                                   blend_mode_5="normal", blend_mode_6="normal", blend_mode_7="normal", blend_mode_8="normal",
                                   background_color="#FFFFFF", background_opacity=255,
+                                  # Layer Offsets
                                   offset_x_1=0, offset_y_1=0, offset_x_2=0, offset_y_2=0,
                                   offset_x_3=0, offset_y_3=0, offset_x_4=0, offset_y_4=0,
                                   offset_x_5=0, offset_y_5=0, offset_x_6=0, offset_y_6=0,
@@ -427,6 +507,10 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
             # Create PSD layers
             layers = []
             for i in range(8):
+                # Skip if no image provided
+                if images[i] is None:
+                    continue
+                    
                 # Convert image tensor to numpy array
                 image_data = tensor_to_numpy_array(images[i])
                 
@@ -450,9 +534,18 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
             
             # Add background layer if requested
             if create_background_layer == "true":
-                # Get image dimensions from first layer
-                first_image = tensor_to_numpy_array(images[0])
-                height, width = first_image.shape[:2]
+                # Get image dimensions from first available layer
+                first_image = None
+                for img in images:
+                    if img is not None:
+                        first_image = tensor_to_numpy_array(img)
+                        break
+                
+                if first_image is not None:
+                    height, width = first_image.shape[:2]
+                else:
+                    # Default dimensions if no images provided
+                    height, width = 512, 512
                 
                 # Create background layer
                 background_data = self._create_background_layer(
