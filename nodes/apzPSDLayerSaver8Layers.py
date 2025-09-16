@@ -73,58 +73,56 @@ class APZmediaPSDLayerSaver8Layers:
                 "image_1": ("IMAGE",),
                 "mask_1": ("MASK",),
                 "layer_name_1": ("STRING", {"default": "Background"}),
+                "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_1": (cls._blend_modes, {"default": "normal"}),
                 
                 # Layer 2 Group
                 "image_2": ("IMAGE",),
                 "mask_2": ("MASK",),
                 "layer_name_2": ("STRING", {"default": "Character"}),
+                "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_2": (cls._blend_modes, {"default": "normal"}),
                 
                 # Layer 3 Group
                 "image_3": ("IMAGE",),
                 "mask_3": ("MASK",),
                 "layer_name_3": ("STRING", {"default": "Hair"}),
+                "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_3": (cls._blend_modes, {"default": "normal"}),
                 
                 # Layer 4 Group
                 "image_4": ("IMAGE",),
                 "mask_4": ("MASK",),
                 "layer_name_4": ("STRING", {"default": "Clothing"}),
+                "opacity_4": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_4": (cls._blend_modes, {"default": "normal"}),
                 
                 # Layer 5 Group
                 "image_5": ("IMAGE",),
                 "mask_5": ("MASK",),
                 "layer_name_5": ("STRING", {"default": "Accessories"}),
+                "opacity_5": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_5": (cls._blend_modes, {"default": "normal"}),
                 
                 # Layer 6 Group
                 "image_6": ("IMAGE",),
                 "mask_6": ("MASK",),
                 "layer_name_6": ("STRING", {"default": "Effects"}),
+                "opacity_6": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
                 
                 # Layer 7 Group
                 "image_7": ("IMAGE",),
                 "mask_7": ("MASK",),
                 "layer_name_7": ("STRING", {"default": "Lighting"}),
+                "opacity_7": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
                 
                 # Layer 8 Group
                 "image_8": ("IMAGE",),
                 "mask_8": ("MASK",),
                 "layer_name_8": ("STRING", {"default": "Overlay"}),
-                
-                # Layer Properties
-                "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_4": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_5": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_6": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_7": ("INT", {"default": 255, "min": 0, "max": 255}),
                 "opacity_8": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "blend_mode_1": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_2": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_3": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_4": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_5": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
                 "blend_mode_8": (cls._blend_modes, {"default": "normal"}),
                 
                 # Background Layer Settings
@@ -143,26 +141,22 @@ class APZmediaPSDLayerSaver8Layers:
                          # Global Settings
                          psd_filename, color_mode="rgb",
                          # Layer 1 Group
-                         image_1=None, mask_1=None, layer_name_1="Background",
+                         image_1=None, mask_1=None, layer_name_1="Background", opacity_1=255, blend_mode_1="normal",
                          # Layer 2 Group
-                         image_2=None, mask_2=None, layer_name_2="Character",
+                         image_2=None, mask_2=None, layer_name_2="Character", opacity_2=255, blend_mode_2="normal",
                          # Layer 3 Group
-                         image_3=None, mask_3=None, layer_name_3="Hair",
+                         image_3=None, mask_3=None, layer_name_3="Hair", opacity_3=255, blend_mode_3="normal",
                          # Layer 4 Group
-                         image_4=None, mask_4=None, layer_name_4="Clothing",
+                         image_4=None, mask_4=None, layer_name_4="Clothing", opacity_4=255, blend_mode_4="normal",
                          # Layer 5 Group
-                         image_5=None, mask_5=None, layer_name_5="Accessories",
+                         image_5=None, mask_5=None, layer_name_5="Accessories", opacity_5=255, blend_mode_5="normal",
                          # Layer 6 Group
-                         image_6=None, mask_6=None, layer_name_6="Effects",
+                         image_6=None, mask_6=None, layer_name_6="Effects", opacity_6=255, blend_mode_6="normal",
                          # Layer 7 Group
-                         image_7=None, mask_7=None, layer_name_7="Lighting",
+                         image_7=None, mask_7=None, layer_name_7="Lighting", opacity_7=255, blend_mode_7="normal",
                          # Layer 8 Group
-                         image_8=None, mask_8=None, layer_name_8="Overlay",
-                         # Optional Layer Properties
-                         opacity_1=255, opacity_2=255, opacity_3=255, opacity_4=255,
-                         opacity_5=255, opacity_6=255, opacity_7=255, opacity_8=255,
-                         blend_mode_1="normal", blend_mode_2="normal", blend_mode_3="normal", blend_mode_4="normal",
-                         blend_mode_5="normal", blend_mode_6="normal", blend_mode_7="normal", blend_mode_8="normal",
+                         image_8=None, mask_8=None, layer_name_8="Overlay", opacity_8=255, blend_mode_8="normal",
+                         # Background Layer Settings
                          create_background_layer="false", background_color="#FFFFFF", background_opacity=255) -> Tuple[str, bool, int]:
         """
         Saves exactly 8 images as layers in a PSD file with individual masks and properties.
@@ -349,81 +343,77 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
                 "image_1": ("IMAGE",),
                 "mask_1": ("MASK",),
                 "layer_name_1": ("STRING", {"default": "Background"}),
+                "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_1": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_1": ("INT", {"default": 0}),
+                "offset_y_1": ("INT", {"default": 0}),
                 
                 # Layer 2 Group
                 "image_2": ("IMAGE",),
                 "mask_2": ("MASK",),
                 "layer_name_2": ("STRING", {"default": "Character"}),
+                "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_2": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_2": ("INT", {"default": 0}),
+                "offset_y_2": ("INT", {"default": 0}),
                 
                 # Layer 3 Group
                 "image_3": ("IMAGE",),
                 "mask_3": ("MASK",),
                 "layer_name_3": ("STRING", {"default": "Hair"}),
+                "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_3": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_3": ("INT", {"default": 0}),
+                "offset_y_3": ("INT", {"default": 0}),
                 
                 # Layer 4 Group
                 "image_4": ("IMAGE",),
                 "mask_4": ("MASK",),
                 "layer_name_4": ("STRING", {"default": "Clothing"}),
+                "opacity_4": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_4": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_4": ("INT", {"default": 0}),
+                "offset_y_4": ("INT", {"default": 0}),
                 
                 # Layer 5 Group
                 "image_5": ("IMAGE",),
                 "mask_5": ("MASK",),
                 "layer_name_5": ("STRING", {"default": "Accessories"}),
+                "opacity_5": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_5": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_5": ("INT", {"default": 0}),
+                "offset_y_5": ("INT", {"default": 0}),
                 
                 # Layer 6 Group
                 "image_6": ("IMAGE",),
                 "mask_6": ("MASK",),
                 "layer_name_6": ("STRING", {"default": "Effects"}),
+                "opacity_6": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_6": ("INT", {"default": 0}),
+                "offset_y_6": ("INT", {"default": 0}),
                 
                 # Layer 7 Group
                 "image_7": ("IMAGE",),
                 "mask_7": ("MASK",),
                 "layer_name_7": ("STRING", {"default": "Lighting"}),
+                "opacity_7": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_7": ("INT", {"default": 0}),
+                "offset_y_7": ("INT", {"default": 0}),
                 
                 # Layer 8 Group
                 "image_8": ("IMAGE",),
                 "mask_8": ("MASK",),
                 "layer_name_8": ("STRING", {"default": "Overlay"}),
-                
-                # Layer Properties
-                "opacity_1": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_2": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_3": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_4": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_5": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_6": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "opacity_7": ("INT", {"default": 255, "min": 0, "max": 255}),
                 "opacity_8": ("INT", {"default": 255, "min": 0, "max": 255}),
-                "blend_mode_1": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_2": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_3": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_4": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_5": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_6": (cls._blend_modes, {"default": "normal"}),
-                "blend_mode_7": (cls._blend_modes, {"default": "normal"}),
                 "blend_mode_8": (cls._blend_modes, {"default": "normal"}),
+                "offset_x_8": ("INT", {"default": 0}),
+                "offset_y_8": ("INT", {"default": 0}),
                 
                 # Background Layer Settings
                 "background_color": ("STRING", {"default": "#FFFFFF"}),
                 "background_opacity": ("INT", {"default": 255, "min": 0, "max": 255}),
-                
-                # Layer Offsets
-                "offset_x_1": ("INT", {"default": 0}),
-                "offset_y_1": ("INT", {"default": 0}),
-                "offset_x_2": ("INT", {"default": 0}),
-                "offset_y_2": ("INT", {"default": 0}),
-                "offset_x_3": ("INT", {"default": 0}),
-                "offset_y_3": ("INT", {"default": 0}),
-                "offset_x_4": ("INT", {"default": 0}),
-                "offset_y_4": ("INT", {"default": 0}),
-                "offset_x_5": ("INT", {"default": 0}),
-                "offset_y_5": ("INT", {"default": 0}),
-                "offset_x_6": ("INT", {"default": 0}),
-                "offset_y_6": ("INT", {"default": 0}),
-                "offset_x_7": ("INT", {"default": 0}),
-                "offset_y_7": ("INT", {"default": 0}),
-                "offset_x_8": ("INT", {"default": 0}),
-                "offset_y_8": ("INT", {"default": 0}),
             }
         }
     
@@ -436,32 +426,23 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
                                   # Global Settings
                                   psd_filename, color_mode="rgb", create_background_layer="true",
                                   # Layer 1 Group
-                                  image_1=None, mask_1=None, layer_name_1="Background",
+                                  image_1=None, mask_1=None, layer_name_1="Background", opacity_1=255, blend_mode_1="normal", offset_x_1=0, offset_y_1=0,
                                   # Layer 2 Group
-                                  image_2=None, mask_2=None, layer_name_2="Character",
+                                  image_2=None, mask_2=None, layer_name_2="Character", opacity_2=255, blend_mode_2="normal", offset_x_2=0, offset_y_2=0,
                                   # Layer 3 Group
-                                  image_3=None, mask_3=None, layer_name_3="Hair",
+                                  image_3=None, mask_3=None, layer_name_3="Hair", opacity_3=255, blend_mode_3="normal", offset_x_3=0, offset_y_3=0,
                                   # Layer 4 Group
-                                  image_4=None, mask_4=None, layer_name_4="Clothing",
+                                  image_4=None, mask_4=None, layer_name_4="Clothing", opacity_4=255, blend_mode_4="normal", offset_x_4=0, offset_y_4=0,
                                   # Layer 5 Group
-                                  image_5=None, mask_5=None, layer_name_5="Accessories",
+                                  image_5=None, mask_5=None, layer_name_5="Accessories", opacity_5=255, blend_mode_5="normal", offset_x_5=0, offset_y_5=0,
                                   # Layer 6 Group
-                                  image_6=None, mask_6=None, layer_name_6="Effects",
+                                  image_6=None, mask_6=None, layer_name_6="Effects", opacity_6=255, blend_mode_6="normal", offset_x_6=0, offset_y_6=0,
                                   # Layer 7 Group
-                                  image_7=None, mask_7=None, layer_name_7="Lighting",
+                                  image_7=None, mask_7=None, layer_name_7="Lighting", opacity_7=255, blend_mode_7="normal", offset_x_7=0, offset_y_7=0,
                                   # Layer 8 Group
-                                  image_8=None, mask_8=None, layer_name_8="Overlay",
-                                  # Optional Layer Properties
-                                  opacity_1=255, opacity_2=255, opacity_3=255, opacity_4=255,
-                                  opacity_5=255, opacity_6=255, opacity_7=255, opacity_8=255,
-                                  blend_mode_1="normal", blend_mode_2="normal", blend_mode_3="normal", blend_mode_4="normal",
-                                  blend_mode_5="normal", blend_mode_6="normal", blend_mode_7="normal", blend_mode_8="normal",
-                                  background_color="#FFFFFF", background_opacity=255,
-                                  # Layer Offsets
-                                  offset_x_1=0, offset_y_1=0, offset_x_2=0, offset_y_2=0,
-                                  offset_x_3=0, offset_y_3=0, offset_x_4=0, offset_y_4=0,
-                                  offset_x_5=0, offset_y_5=0, offset_x_6=0, offset_y_6=0,
-                                  offset_x_7=0, offset_y_7=0, offset_x_8=0, offset_y_8=0) -> Tuple[str, bool, int]:
+                                  image_8=None, mask_8=None, layer_name_8="Overlay", opacity_8=255, blend_mode_8="normal", offset_x_8=0, offset_y_8=0,
+                                  # Background Layer Settings
+                                  background_color="#FFFFFF", background_opacity=255) -> Tuple[str, bool, int]:
         """
         Advanced PSD layer saving with background layer and offset support for exactly 8 layers.
         
