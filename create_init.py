@@ -1,4 +1,7 @@
-"""
+#!/usr/bin/env python3
+"""Create the __init__.py file with proper encoding"""
+
+content = '''"""
 @author: Pablo Apiolazza
 @title: ComfyUI APZmedia PSD Tools
 @nickname: ComfyUI PSD Tools
@@ -25,18 +28,18 @@ NODE_DISPLAY_NAME_MAPPINGS = {}
 extension_root = os.path.dirname(os.path.abspath(__file__))
 print(f"Extension root directory: {extension_root}")
 
-# Check for psd-tools availability
+# Check for pytoshop availability
 try:
-    from psd_tools import PSDImage
-    PSD_TOOLS_AVAILABLE = True
-    print("psd-tools is available")
+    import pytoshop
+    PYTOSHOP_AVAILABLE = True
+    print("pytoshop is available")
 except ImportError:
-    PSD_TOOLS_AVAILABLE = False
-    print("psd-tools not available - PSD nodes will not be registered")
-    print("   To install: pip install psd-tools")
+    PYTOSHOP_AVAILABLE = False
+    print("pytoshop not available - PSD nodes will not be registered")
+    print("   To install: pip install pytoshop psd-tools")
 
-# Only proceed with node registration if psd-tools is available
-if PSD_TOOLS_AVAILABLE:
+# Only proceed with node registration if pytoshop is available
+if PYTOSHOP_AVAILABLE:
     print("Starting PSD node import process...")
     try:
         # Import PSD nodes using importlib for cross-platform compatibility
@@ -76,20 +79,6 @@ if PSD_TOOLS_AVAILABLE:
         spec.loader.exec_module(psd_8layer_module)
         print("Successfully imported apzPSDLayerSaver8Layers module")
         
-        # Import apzPSDLayerSaverRefactored
-        print("Importing apzPSDLayerSaverRefactored...")
-        psd_refactored_path = os.path.join(nodes_dir, "apzPSDLayerSaverRefactored.py")
-        print(f"PSD refactored path: {psd_refactored_path}")
-        
-        if not os.path.exists(psd_refactored_path):
-            print(f"ERROR: PSD refactored file not found: {psd_refactored_path}")
-            raise FileNotFoundError(f"PSD refactored file not found: {psd_refactored_path}")
-        
-        spec = importlib.util.spec_from_file_location("apzPSDLayerSaverRefactored", psd_refactored_path)
-        psd_refactored_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(psd_refactored_module)
-        print("Successfully imported apzPSDLayerSaverRefactored module")
-        
         # Register nodes
         print("Registering PSD nodes...")
         NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = psd_saver_module.APZmediaPSDLayerSaver
@@ -108,10 +97,6 @@ if PSD_TOOLS_AVAILABLE:
         NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = "APZmedia PSD Layer Saver (8 Layers Advanced)"
         print("Registered APZmediaPSDLayerSaver8LayersAdvanced")
         
-        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverRefactored"] = psd_refactored_module.APZmediaPSDLayerSaverRefactored
-        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverRefactored"] = "APZmedia PSD Layer Saver (Refactored)"
-        print("Registered APZmediaPSDLayerSaverRefactored")
-        
         print(f"Successfully registered {len(NODE_CLASS_MAPPINGS)} PSD nodes")
         logger.info(f"Registered {len(NODE_CLASS_MAPPINGS)} PSD nodes: {list(NODE_CLASS_MAPPINGS.keys())}")
         
@@ -124,8 +109,8 @@ if PSD_TOOLS_AVAILABLE:
         import traceback
         traceback.print_exc()
 else:
-    print("Skipping PSD node registration - psd-tools not available")
-    logger.info("Skipping PSD node registration - psd-tools not available")
+    print("Skipping PSD node registration - pytoshop not available")
+    logger.info("Skipping PSD node registration - pytoshop not available")
 
 print(f"ComfyUI PSD Tools extension loaded - {len(NODE_CLASS_MAPPINGS)} nodes available")
 if NODE_CLASS_MAPPINGS:
@@ -134,3 +119,8 @@ if NODE_CLASS_MAPPINGS:
         print(f"  - {key}: {value}")
 else:
     print("No nodes were registered")
+'''
+
+with open('__init__.py', 'w', encoding='utf-8') as f:
+    f.write(content)
+print('__init__.py created successfully')
