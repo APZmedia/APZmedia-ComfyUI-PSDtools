@@ -280,14 +280,26 @@ def get_layer_info(psd: PSDImage, layer_index: int) -> dict:
         # Get bounding box
         if hasattr(layer, 'bbox'):
             bbox = layer.bbox
-            info['bbox'] = {
-                'left': bbox.left,
-                'top': bbox.top,
-                'right': bbox.right,
-                'bottom': bbox.bottom,
-                'width': bbox.right - bbox.left,
-                'height': bbox.bottom - bbox.top
-            }
+            # Handle both tuple and object formats
+            if isinstance(bbox, tuple) and len(bbox) >= 4:
+                left, top, right, bottom = bbox[:4]
+                info['bbox'] = {
+                    'left': left,
+                    'top': top,
+                    'right': right,
+                    'bottom': bottom,
+                    'width': right - left,
+                    'height': bottom - top
+                }
+            elif hasattr(bbox, 'left'):
+                info['bbox'] = {
+                    'left': bbox.left,
+                    'top': bbox.top,
+                    'right': bbox.right,
+                    'bottom': bbox.bottom,
+                    'width': bbox.right - bbox.left,
+                    'height': bbox.bottom - bbox.top
+                }
         
         # Check for mask
         if hasattr(layer, '_record') and hasattr(layer._record, 'mask_data') and layer._record.mask_data is not None:
