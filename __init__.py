@@ -90,6 +90,20 @@ if PSD_TOOLS_AVAILABLE:
         spec.loader.exec_module(psd_refactored_module)
         print("Successfully imported apzPSDLayerSaverRefactored module")
         
+        # Import apzPSDLayerLoader
+        print("Importing apzPSDLayerLoader...")
+        psd_loader_path = os.path.join(nodes_dir, "apzPSDLayerLoader.py")
+        print(f"PSD loader path: {psd_loader_path}")
+        
+        if not os.path.exists(psd_loader_path):
+            print(f"ERROR: PSD loader file not found: {psd_loader_path}")
+            raise FileNotFoundError(f"PSD loader file not found: {psd_loader_path}")
+        
+        spec = importlib.util.spec_from_file_location("apzPSDLayerLoader", psd_loader_path)
+        psd_loader_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(psd_loader_module)
+        print("Successfully imported apzPSDLayerLoader module")
+        
         # Register nodes
         print("Registering PSD nodes...")
         NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = psd_saver_module.APZmediaPSDLayerSaver
@@ -111,6 +125,14 @@ if PSD_TOOLS_AVAILABLE:
         NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverRefactored"] = psd_refactored_module.APZmediaPSDLayerSaverRefactored
         NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverRefactored"] = "APZmedia PSD Layer Saver (Refactored)"
         print("Registered APZmediaPSDLayerSaverRefactored")
+        
+        NODE_CLASS_MAPPINGS["APZmediaPSDLayerLoader"] = psd_loader_module.APZmediaPSDLayerLoader
+        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerLoader"] = "APZmedia PSD Layer Loader"
+        print("Registered APZmediaPSDLayerLoader")
+        
+        NODE_CLASS_MAPPINGS["APZmediaPSDInfoLoader"] = psd_loader_module.APZmediaPSDInfoLoader
+        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDInfoLoader"] = "APZmedia PSD Info Loader"
+        print("Registered APZmediaPSDInfoLoader")
         
         print(f"Successfully registered {len(NODE_CLASS_MAPPINGS)} PSD nodes")
         logger.info(f"Registered {len(NODE_CLASS_MAPPINGS)} PSD nodes: {list(NODE_CLASS_MAPPINGS.keys())}")
