@@ -185,62 +185,34 @@ def import_node_module(module_name, class_name, nodes_path):
         raise e3
 
 # Importing custom nodes
-APZmediaPSDLayerSaver = None
-APZmediaPSDLayerSaverAdvanced = None
-APZmediaPSDLayerSaver8Layers = None
-APZmediaPSDLayerSaver8LayersAdvanced = None
+APZmediaPSDLayerSaverMultilayer = None
+APZmediaPSDLayerLoader = None
 
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver ---{Colors.END}")
+print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaverMultilayer ---{Colors.END}")
 try:
     # Ensure dependencies are available before importing
     if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaver = import_node_module("apzPSDLayerSaver", "APZmediaPSDLayerSaver", nodes_path)
-        logger.info("Successfully imported APZmediaPSDLayerSaver node.")
+        APZmediaPSDLayerSaverMultilayer = import_node_module("apzPSDLayerSaverRefactored", "APZmediaPSDLayerSaverMultilayer", nodes_path)
+        logger.info("Successfully imported APZmediaPSDLayerSaverMultilayer node.")
     else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaver node.")
+        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaverMultilayer node{Colors.END}")
+        logger.error("Dependencies not available for APZmediaPSDLayerSaverMultilayer node.")
 except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaver node.", exc_info=True)
+    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaverMultilayer node: {e}{Colors.END}")
+    logger.error("Failed to import APZmediaPSDLayerSaverMultilayer node.", exc_info=True)
 
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaverAdvanced ---{Colors.END}")
+print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerLoader ---{Colors.END}")
 try:
     # Ensure dependencies are available before importing
     if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaverAdvanced = import_node_module("apzPSDLayerSaver", "APZmediaPSDLayerSaverAdvanced", nodes_path)
-        logger.info("Successfully imported APZmediaPSDLayerSaverAdvanced node.")
+        APZmediaPSDLayerLoader = import_node_module("apzPSDLayerLoader", "APZmediaPSDLayerLoader", nodes_path)
+        logger.info("Successfully imported APZmediaPSDLayerLoader node.")
     else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaverAdvanced node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaverAdvanced node.")
+        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerLoader node{Colors.END}")
+        logger.error("Dependencies not available for APZmediaPSDLayerLoader node.")
 except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaverAdvanced node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaverAdvanced node.", exc_info=True)
-
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8Layers ---{Colors.END}")
-try:
-    # Ensure dependencies are available before importing
-    if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaver8Layers = import_node_module("apzPSDLayerSaver8Layers", "APZmediaPSDLayerSaver8Layers", nodes_path)
-        logger.info("Successfully imported APZmediaPSDLayerSaver8Layers node.")
-    else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver8Layers node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaver8Layers node.")
-except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver8Layers node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaver8Layers node.", exc_info=True)
-
-print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaver8LayersAdvanced ---{Colors.END}")
-try:
-    # Ensure dependencies are available before importing
-    if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaver8LayersAdvanced = import_node_module("apzPSDLayerSaver8Layers", "APZmediaPSDLayerSaver8LayersAdvanced", nodes_path)
-        logger.info("Successfully imported APZmediaPSDLayerSaver8LayersAdvanced node.")
-    else:
-        print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaver8LayersAdvanced node{Colors.END}")
-        logger.error("Dependencies not available for APZmediaPSDLayerSaver8LayersAdvanced node.")
-except Exception as e:
-    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerSaver8LayersAdvanced node: {e}{Colors.END}")
-    logger.error("Failed to import APZmediaPSDLayerSaver8LayersAdvanced node.", exc_info=True)
+    print(f"{Colors.RED}❌ Failed to import APZmediaPSDLayerLoader node: {e}{Colors.END}")
+    logger.error("Failed to import APZmediaPSDLayerLoader node.", exc_info=True)
 
 # Utilities should be imported as needed, but not registered as nodes
 print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing PSD Utilities ---{Colors.END}")
@@ -290,21 +262,13 @@ except Exception as e:
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
-if APZmediaPSDLayerSaver is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = APZmediaPSDLayerSaver
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver"] = "APZmedia PSD Layer Saver"
+if APZmediaPSDLayerSaverMultilayer is not None:
+    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverMultilayer"] = APZmediaPSDLayerSaverMultilayer
+    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverMultilayer"] = "APZmedia PSD Multilayer Saver"
 
-if APZmediaPSDLayerSaverAdvanced is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = APZmediaPSDLayerSaverAdvanced
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = "APZmedia PSD Layer Saver Advanced"
-
-if APZmediaPSDLayerSaver8Layers is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = APZmediaPSDLayerSaver8Layers
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = "APZmedia PSD Layer Saver (8 Layers)"
-
-if APZmediaPSDLayerSaver8LayersAdvanced is not None:
-    NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = APZmediaPSDLayerSaver8LayersAdvanced
-    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = "APZmedia PSD Layer Saver (8 Layers Advanced)"
+if APZmediaPSDLayerLoader is not None:
+    NODE_CLASS_MAPPINGS["APZmediaPSDLayerLoader"] = APZmediaPSDLayerLoader
+    NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerLoader"] = "APZmedia PSD Layer Loader"
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
 
@@ -316,7 +280,7 @@ print(f"{Colors.ORANGE}{Colors.BOLD}APZmedia PSD Tools Extension - Load Complete
 print(f"{Colors.ORANGE}{Colors.BOLD}{'=' * 60}{Colors.END}")
 
 successful_nodes = len(NODE_CLASS_MAPPINGS)
-total_nodes = 4
+total_nodes = 2
 
 if successful_nodes == total_nodes:
     print(f"{Colors.GREEN}🎉 SUCCESS: All {successful_nodes}/{total_nodes} nodes loaded successfully!{Colors.END}")

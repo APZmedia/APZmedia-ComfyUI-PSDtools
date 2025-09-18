@@ -90,6 +90,7 @@ class APZmediaPSDLayerSaver:
                 "background_color": ("STRING", {
                     "default": "#FFFFFF"
                 }),
+                "overwrite_mode": (["false", "true"], {"default": "false"}),
             }
         }
     
@@ -106,7 +107,8 @@ class APZmediaPSDLayerSaver:
                        masks: Optional[torch.Tensor] = None,
                        opacities: str = "255",
                        blend_modes: str = "normal",
-                       background_color: str = "#FFFFFF") -> Tuple[str, bool]:
+                       background_color: str = "#FFFFFF",
+                       overwrite_mode: str = "false") -> Tuple[str, bool]:
         """
         Saves images as layers in a PSD file with optional masks.
         
@@ -172,26 +174,61 @@ class APZmediaPSDLayerSaver:
             # Create PSD file
             psd = create_psd_from_layers(layers, color_mode=color_mode)
             
+            # Handle overwrite mode
+            final_output_path = self._handle_overwrite_mode(output_path, overwrite_mode == "true")
+            
             # Ensure output directory exists
-            output_dir = os.path.dirname(output_path)
+            output_dir = os.path.dirname(final_output_path)
             if output_dir and not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             
             # Save PSD file
-            success = save_psd_file(psd, output_path)
+            success = save_psd_file(psd, final_output_path)
             
             if success:
-                print(f"Successfully saved PSD file with {len(layers)} layers to: {output_path}")
-                return output_path, True
+                print(f"Successfully saved PSD file with {len(layers)} layers to: {final_output_path}")
+                return final_output_path, True
             else:
-                print(f"Failed to save PSD file to: {output_path}")
-                return output_path, False
+                print(f"Failed to save PSD file to: {final_output_path}")
+                return final_output_path, False
                 
         except Exception as e:
             print(f"Error in save_psd_layers: {e}")
             import traceback
             traceback.print_exc()
             return output_path, False
+
+    def _handle_overwrite_mode(self, output_path: str, overwrite_mode: bool) -> str:
+        """
+        Handle overwrite mode for file saving.
+        
+        Args:
+            output_path: Original output path
+            overwrite_mode: Whether to overwrite existing files
+            
+        Returns:
+            Final output path (may be modified if overwrite is disabled and file exists)
+        """
+        if overwrite_mode:
+            # Overwrite mode enabled - use original path
+            return output_path
+        
+        # Check if file exists
+        if os.path.exists(output_path):
+            # Generate unique filename
+            base_path = os.path.splitext(output_path)[0]
+            extension = os.path.splitext(output_path)[1]
+            counter = 1
+            
+            while True:
+                new_path = f"{base_path}_{counter}{extension}"
+                if not os.path.exists(new_path):
+                    print(f"File {output_path} already exists, using: {new_path}")
+                    return new_path
+                counter += 1
+        else:
+            # File doesn't exist - use original path
+            return output_path
 
 
 class APZmediaPSDLayerSaverAdvanced:
@@ -247,6 +284,7 @@ class APZmediaPSDLayerSaverAdvanced:
                     "multiline": True,
                     "default": "0,0\n0,0\n0,0"
                 }),
+                "overwrite_mode": (["false", "true"], {"default": "false"}),
             }
         }
     
@@ -266,7 +304,8 @@ class APZmediaPSDLayerSaverAdvanced:
                                 blend_modes: str = "normal",
                                 background_color: str = "#FFFFFF",
                                 background_opacity: int = 255,
-                                layer_offsets: str = "0,0") -> Tuple[str, bool, int]:
+                                layer_offsets: str = "0,0",
+                                overwrite_mode: str = "false") -> Tuple[str, bool, int]:
         """
         Advanced PSD layer saving with background layer and offset support.
         
@@ -368,22 +407,25 @@ class APZmediaPSDLayerSaverAdvanced:
             # Create PSD file
             psd = create_psd_from_layers(layers, color_mode=color_mode)
             
+            # Handle overwrite mode
+            final_output_path = self._handle_overwrite_mode(output_path, overwrite_mode == "true")
+            
             # Ensure output directory exists
-            output_dir = os.path.dirname(output_path)
+            output_dir = os.path.dirname(final_output_path)
             if output_dir and not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             
             # Save PSD file
-            success = save_psd_file(psd, output_path)
+            success = save_psd_file(psd, final_output_path)
             
             layer_count = len(layers)
             
             if success:
-                print(f"Successfully saved PSD file with {layer_count} layers to: {output_path}")
-                return output_path, True, layer_count
+                print(f"Successfully saved PSD file with {layer_count} layers to: {final_output_path}")
+                return final_output_path, True, layer_count
             else:
-                print(f"Failed to save PSD file to: {output_path}")
-                return output_path, False, layer_count
+                print(f"Failed to save PSD file to: {final_output_path}")
+                return final_output_path, False, layer_count
                 
         except Exception as e:
             print(f"Error in save_psd_layers_advanced: {e}")

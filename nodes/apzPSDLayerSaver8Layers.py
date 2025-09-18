@@ -133,6 +133,7 @@ class APZmediaPSDLayerSaver8Layers:
                 "create_background_layer": (["true", "false"], {"default": "false"}),
                 "background_color": ("STRING", {"default": "#FFFFFF"}),
                 "background_opacity": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "overwrite_mode": (["false", "true"], {"default": "false"}),
             }
         }
     
@@ -161,7 +162,7 @@ class APZmediaPSDLayerSaver8Layers:
                          # Layer 8 Group
                          image_8=None, mask_8=None, layer_name_8="Overlay", opacity_8=255, blend_mode_8="normal",
                          # Background Layer Settings
-                         create_background_layer="false", background_color="#FFFFFF", background_opacity=255) -> Tuple[str, bool, int]:
+                         create_background_layer="false", background_color="#FFFFFF", background_opacity=255, overwrite_mode="false") -> Tuple[str, bool, int]:
         """
         Saves exactly 8 images as layers in a PSD file with individual masks and properties.
         
@@ -268,23 +269,58 @@ class APZmediaPSDLayerSaver8Layers:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             
+            # Handle overwrite mode
+            final_output_path = self._handle_overwrite_mode(psd_filename, overwrite_mode == "true")
+            
             # Save PSD file
-            success = save_psd_file(psd, psd_filename)
+            success = save_psd_file(psd, final_output_path)
             
             layer_count = len(layers)
             
             if success:
-                print(f"Successfully saved PSD file with {layer_count} layers to: {psd_filename}")
-                return psd_filename, True, layer_count
+                print(f"Successfully saved PSD file with {layer_count} layers to: {final_output_path}")
+                return final_output_path, True, layer_count
             else:
-                print(f"Failed to save PSD file to: {psd_filename}")
-                return psd_filename, False, layer_count
+                print(f"Failed to save PSD file to: {final_output_path}")
+                return final_output_path, False, layer_count
                 
         except Exception as e:
             print(f"Error in save_8_layers_psd: {e}")
             import traceback
             traceback.print_exc()
             return psd_filename, False, 0
+
+    def _handle_overwrite_mode(self, output_path: str, overwrite_mode: bool) -> str:
+        """
+        Handle overwrite mode for file saving.
+        
+        Args:
+            output_path: Original output path
+            overwrite_mode: Whether to overwrite existing files
+            
+        Returns:
+            Final output path (may be modified if overwrite is disabled and file exists)
+        """
+        if overwrite_mode:
+            # Overwrite mode enabled - use original path
+            return output_path
+        
+        # Check if file exists
+        if os.path.exists(output_path):
+            # Generate unique filename
+            base_path = os.path.splitext(output_path)[0]
+            extension = os.path.splitext(output_path)[1]
+            counter = 1
+            
+            while True:
+                new_path = f"{base_path}_{counter}{extension}"
+                if not os.path.exists(new_path):
+                    print(f"File {output_path} already exists, using: {new_path}")
+                    return new_path
+                counter += 1
+        else:
+            # File doesn't exist - use original path
+            return output_path
     
     def _create_background_layer(self, width: int, height: int, 
                                 color: str, opacity: int) -> torch.Tensor:
@@ -418,6 +454,7 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
                 # Background Layer Settings
                 "background_color": ("STRING", {"default": "#FFFFFF"}),
                 "background_opacity": ("INT", {"default": 255, "min": 0, "max": 255}),
+                "overwrite_mode": (["false", "true"], {"default": "false"}),
             }
         }
     
@@ -446,7 +483,7 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
                                   # Layer 8 Group
                                   image_8=None, mask_8=None, layer_name_8="Overlay", opacity_8=255, blend_mode_8="normal", offset_x_8=0, offset_y_8=0,
                                   # Background Layer Settings
-                                  background_color="#FFFFFF", background_opacity=255) -> Tuple[str, bool, int]:
+                                  background_color="#FFFFFF", background_opacity=255, overwrite_mode="false") -> Tuple[str, bool, int]:
         """
         Advanced PSD layer saving with background layer and offset support for exactly 8 layers.
         
@@ -560,17 +597,20 @@ class APZmediaPSDLayerSaver8LayersAdvanced:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
             
+            # Handle overwrite mode
+            final_output_path = self._handle_overwrite_mode(psd_filename, overwrite_mode == "true")
+            
             # Save PSD file
-            success = save_psd_file(psd, psd_filename)
+            success = save_psd_file(psd, final_output_path)
             
             layer_count = len(layers)
             
             if success:
-                print(f"Successfully saved PSD file with {layer_count} layers to: {psd_filename}")
-                return psd_filename, True, layer_count
+                print(f"Successfully saved PSD file with {layer_count} layers to: {final_output_path}")
+                return final_output_path, True, layer_count
             else:
-                print(f"Failed to save PSD file to: {psd_filename}")
-                return psd_filename, False, layer_count
+                print(f"Failed to save PSD file to: {final_output_path}")
+                return final_output_path, False, layer_count
                 
         except Exception as e:
             print(f"Error in save_8_layers_psd_advanced: {e}")

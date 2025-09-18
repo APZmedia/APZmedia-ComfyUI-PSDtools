@@ -7,10 +7,14 @@ Uses PIL and psd-tools instead of pytoshop for better compatibility and performa
 
 import torch
 import os
+import logging
 from typing import List, Optional, Tuple
 # ComfyUI-compatible import pattern
 import sys
 import os
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Add extension root to Python path (ComfyUI standard pattern)
 extension_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,14 +36,14 @@ except ImportError as e:
         raise ImportError("PSD utilities not available")
 
 
-class APZmediaPSDLayerSaverRefactored:
+class APZmediaPSDLayerSaverMultilayer:
     """
-    ComfyUI node for saving up to 10 images as PSD layers with masks.
-    Refactored to use PIL and psd-tools.
+    ComfyUI node for saving multiple images as PSD layers with masks.
+    Uses PIL and psd-tools for better compatibility and performance.
     """
     
     def __init__(self, device="cpu"):
-        print("APZmediaPSDLayerSaverRefactored initialized")
+        print("APZmediaPSDLayerSaverMultilayer initialized")
         self.device = device
     
     @classmethod
@@ -170,7 +174,9 @@ class APZmediaPSDLayerSaverRefactored:
                     valid_names.append(name)
             
             if not valid_layers:
-                print("No layers provided - nothing to save")
+                error_msg = "No layers or masks are being saved"
+                print(f"❌ {error_msg}")
+                logger.error(error_msg)
                 return
             
             print(f"Processing {len(valid_layers)} layers for PSD creation")
@@ -197,9 +203,9 @@ class APZmediaPSDLayerSaverRefactored:
 
 # Node class mappings for ComfyUI
 NODE_CLASS_MAPPINGS = {
-    "APZmediaPSDLayerSaverRefactored": APZmediaPSDLayerSaverRefactored
+    "APZmediaPSDLayerSaverMultilayer": APZmediaPSDLayerSaverMultilayer
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "APZmediaPSDLayerSaverRefactored": "APZmedia PSD Layer Saver (Refactored)"
+    "APZmediaPSDLayerSaverMultilayer": "APZmedia PSD Multilayer Saver"
 }
