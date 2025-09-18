@@ -48,33 +48,6 @@ if PSD_TOOLS_AVAILABLE:
             print(f"ERROR: Nodes directory not found: {nodes_dir}")
             raise FileNotFoundError(f"Nodes directory not found: {nodes_dir}")
         
-        # Import apzPSDLayerSaver
-        print("Importing apzPSDLayerSaver...")
-        psd_saver_path = os.path.join(nodes_dir, "apzPSDLayerSaver.py")
-        print(f"PSD saver path: {psd_saver_path}")
-        
-        if not os.path.exists(psd_saver_path):
-            print(f"ERROR: PSD saver file not found: {psd_saver_path}")
-            raise FileNotFoundError(f"PSD saver file not found: {psd_saver_path}")
-        
-        spec = importlib.util.spec_from_file_location("apzPSDLayerSaver", psd_saver_path)
-        psd_saver_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(psd_saver_module)
-        print("Successfully imported apzPSDLayerSaver module")
-        
-        # Import apzPSDLayerSaver8Layers
-        print("Importing apzPSDLayerSaver8Layers...")
-        psd_8layer_path = os.path.join(nodes_dir, "apzPSDLayerSaver8Layers.py")
-        print(f"PSD 8-layer path: {psd_8layer_path}")
-        
-        if not os.path.exists(psd_8layer_path):
-            print(f"ERROR: PSD 8-layer file not found: {psd_8layer_path}")
-            raise FileNotFoundError(f"PSD 8-layer file not found: {psd_8layer_path}")
-        
-        spec = importlib.util.spec_from_file_location("apzPSDLayerSaver8Layers", psd_8layer_path)
-        psd_8layer_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(psd_8layer_module)
-        print("Successfully imported apzPSDLayerSaver8Layers module")
         
         # Import apzPSDLayerSaverRefactored
         print("Importing apzPSDLayerSaverRefactored...")
@@ -106,25 +79,9 @@ if PSD_TOOLS_AVAILABLE:
         
         # Register nodes
         print("Registering PSD nodes...")
-        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = psd_saver_module.APZmediaPSDLayerSaver
+        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver"] = psd_refactored_module.APZmediaPSDLayerSaverRefactored
         NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver"] = "APZmedia PSD Layer Saver"
         print("Registered APZmediaPSDLayerSaver")
-        
-        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = psd_saver_module.APZmediaPSDLayerSaverAdvanced
-        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverAdvanced"] = "APZmedia PSD Layer Saver Advanced"
-        print("Registered APZmediaPSDLayerSaverAdvanced")
-        
-        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = psd_8layer_module.APZmediaPSDLayerSaver8Layers
-        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8Layers"] = "APZmedia PSD Layer Saver (8 Layers)"
-        print("Registered APZmediaPSDLayerSaver8Layers")
-        
-        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = psd_8layer_module.APZmediaPSDLayerSaver8LayersAdvanced
-        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaver8LayersAdvanced"] = "APZmedia PSD Layer Saver (8 Layers Advanced)"
-        print("Registered APZmediaPSDLayerSaver8LayersAdvanced")
-        
-        NODE_CLASS_MAPPINGS["APZmediaPSDLayerSaverRefactored"] = psd_refactored_module.APZmediaPSDLayerSaverRefactored
-        NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerSaverRefactored"] = "APZmedia PSD Layer Saver (Refactored)"
-        print("Registered APZmediaPSDLayerSaverRefactored")
         
         NODE_CLASS_MAPPINGS["APZmediaPSDLayerLoader"] = psd_loader_module.APZmediaPSDLayerLoader
         NODE_DISPLAY_NAME_MAPPINGS["APZmediaPSDLayerLoader"] = "APZmedia PSD Layer Loader"

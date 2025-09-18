@@ -45,15 +45,13 @@ class APZmediaPSDLayerSaverRefactored:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
+            "optional": {
                 "output_dir": ("STRING", {
                     "default": "./output"
                 }),
                 "filename_prefix": ("STRING", {
                     "default": "output"
                 }),
-            },
-            "optional": {
                 # Layer 1
                 "layer1": ("IMAGE",),
                 "mask1": ("MASK",),
@@ -113,25 +111,25 @@ class APZmediaPSDLayerSaverRefactored:
     OUTPUT_NODE = True  # This is an output node that writes to disk
     
     def save_psd_layers(self, 
-                       output_dir: str = "./output",
-                       filename_prefix: str = "output",
+                       output_dir=None,
+                       filename_prefix=None,
                        # Layer inputs
-                       layer1=None, mask1=None, layer_name1="Layer 1",
-                       layer2=None, mask2=None, layer_name2="Layer 2",
-                       layer3=None, mask3=None, layer_name3="Layer 3",
-                       layer4=None, mask4=None, layer_name4="Layer 4",
-                       layer5=None, mask5=None, layer_name5="Layer 5",
-                       layer6=None, mask6=None, layer_name6="Layer 6",
-                       layer7=None, mask7=None, layer_name7="Layer 7",
-                       layer8=None, mask8=None, layer_name8="Layer 8",
-                       layer9=None, mask9=None, layer_name9="Layer 9",
-                       layer10=None, mask10=None, layer_name10="Layer 10"):
+                       layer1=None, mask1=None, layer_name1=None,
+                       layer2=None, mask2=None, layer_name2=None,
+                       layer3=None, mask3=None, layer_name3=None,
+                       layer4=None, mask4=None, layer_name4=None,
+                       layer5=None, mask5=None, layer_name5=None,
+                       layer6=None, mask6=None, layer_name6=None,
+                       layer7=None, mask7=None, layer_name7=None,
+                       layer8=None, mask8=None, layer_name8=None,
+                       layer9=None, mask9=None, layer_name9=None,
+                       layer10=None, mask10=None, layer_name10=None):
         """
         Saves up to 10 images as layers in a PSD file with optional masks.
         
         Args:
-            output_dir: Directory to save the PSD file
-            filename_prefix: Prefix for the filename
+            output_dir: Directory to save the PSD file (default: "./output")
+            filename_prefix: Prefix for the filename (default: "output")
             layer1-10: Individual image tensors
             mask1-10: Optional individual masks
             layer_name1-10: Individual layer names
@@ -143,11 +141,22 @@ class APZmediaPSDLayerSaverRefactored:
             # Check if psd-tools is available
             check_psd_tools_available()
             
+            # Set defaults for optional parameters
+            if output_dir is None:
+                output_dir = "./output"
+            if filename_prefix is None:
+                filename_prefix = "output"
+            
             # Organize inputs into lists
             layers = [layer1, layer2, layer3, layer4, layer5, layer6, layer7, layer8, layer9, layer10]
             masks = [mask1, mask2, mask3, mask4, mask5, mask6, mask7, mask8, mask9, mask10]
             layer_names = [layer_name1, layer_name2, layer_name3, layer_name4, layer_name5,
                           layer_name6, layer_name7, layer_name8, layer_name9, layer_name10]
+            
+            # Set default layer names for None values
+            for i in range(len(layer_names)):
+                if layer_names[i] is None:
+                    layer_names[i] = f"Layer {i+1}"
             
             # Filter out None layers and create corresponding lists
             valid_layers = []
