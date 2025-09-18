@@ -1,22 +1,22 @@
 {
   "pytoshop": {
     "installed": true,
-    "timestamp": 1758064995.9080653
+    "timestamp": 1758229916.7468212
   },
   "psd-tools": {
-    "installed": true,
-    "timestamp": 1758064996.6505153
+    "installed": false,
+    "timestamp": 1758231126.661511
   },
   "Pillow": {
-    "installed": true,
-    "timestamp": 1758064997.4226642
+    "installed": false,
+    "timestamp": 1758231128.822585
   },
   "torch": {
     "installed": true,
-    "timestamp": 1758064999.1536791
+    "timestamp": 1758229931.590956
   },
   "numpy": {
     "installed": true,
-    "timestamp": 1758064999.1618104
+    "timestamp": 1758229931.5916748
   }
 }
