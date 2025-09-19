@@ -185,16 +185,23 @@ class APZmediaPSDLayerSaverMultilayer:
             for i, (layer, mask, name) in enumerate(zip(layers, masks, layer_names)):
                 if layer is not None:
                     valid_layers.append(layer)
-                    valid_masks.append(mask)
+                    valid_masks.append(mask)  # Keep mask even if None for proper indexing
                     valid_names.append(name)
+                    
+                    # Debug output for mask processing
+                    if mask is not None:
+                        print(f"✅ Layer {i+1} '{name}' has mask: {mask.shape if hasattr(mask, 'shape') else 'unknown shape'}")
+                    else:
+                        print(f"ℹ️ Layer {i+1} '{name}' has no mask")
             
             if not valid_layers:
-                error_msg = "No layers or masks are being saved"
+                error_msg = "No layers provided for saving"
                 print(f"❌ {error_msg}")
                 logger.error(error_msg)
                 return
             
             print(f"Processing {len(valid_layers)} layers for PSD creation")
+            print(f"Masks provided: {sum(1 for mask in valid_masks if mask is not None)}/{len(valid_masks)}")
             print(f"Overwrite mode: {overwrite_mode}")
             
             # Handle overwrite mode

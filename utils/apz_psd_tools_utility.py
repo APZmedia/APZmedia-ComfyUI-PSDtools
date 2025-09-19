@@ -225,10 +225,31 @@ def create_simple_psd_layer(pil_image: Image.Image, layer_name: str,
     
     # If mask is provided, apply it to the image
     if pil_mask is not None:
+        print(f"🎭 Processing mask for layer '{layer_name}': {pil_mask.size} mode: {pil_mask.mode}")
+        
+        # Validate mask
+        if pil_mask.mode not in ['L', 'LA']:
+            print(f"⚠️ Converting mask from {pil_mask.mode} to L mode")
+            pil_mask = pil_mask.convert('L')
+        
+        # Resize mask to match image if needed
+        if pil_mask.size != pil_image.size:
+            print(f"📏 Resizing mask from {pil_mask.size} to {pil_image.size}")
+            pil_mask = pil_mask.resize(pil_image.size, Image.LANCZOS)
+        
         # Apply mask to image using PIL compositing
+        original_mode = pil_image.mode
         pil_image = apply_mask_to_image(pil_image, pil_mask)
-        print(f"✅ Applied mask to layer '{layer_name}'")
+        print(f"✅ Applied mask to layer '{layer_name}' (image mode: {original_mode} -> {pil_image.mode})")
+        
+        # Verify mask was applied by checking alpha channel
+        if pil_image.mode == 'RGBA':
+            alpha_channel = pil_image.split()[3]
+            alpha_stats = alpha_channel.getextrema()
+            print(f"🔍 Alpha channel range for '{layer_name}': {alpha_stats[0]}-{alpha_stats[1]}")
+        
     else:
+        print(f"ℹ️ No mask provided for layer '{layer_name}' - using full opacity")
         # Ensure image has alpha channel for consistency
         if pil_image.mode != 'RGBA':
             pil_image = pil_image.convert('RGBA')
@@ -238,6 +259,8 @@ def create_simple_psd_layer(pil_image: Image.Image, layer_name: str,
     
     # Create the layer from the PIL image (psd-tools handles the conversion)
     layer = PixelLayer.frompil(pil_image, temp_psd, layer_name)
+    
+    print(f"🎨 Created PSD layer '{layer_name}' with size {pil_image.size}")
     
     return layer
 
@@ -355,15 +378,22 @@ def process_layers_to_psd(image_tensors: List[torch.Tensor],
         # Process masks if provided
         pil_masks = []
         if mask_tensors:
+            print(f"🎭 Processing {len(mask_tensors)} mask tensors...")
             for i, mask_tensor in enumerate(mask_tensors):
                 if mask_tensor is not None:
-                    pil_mask = tensor_to_pil_mask(mask_tensor)
-                    pil_masks.append(pil_mask)
-                    print(f"✅ Converted mask {i+1} to PIL mask: {pil_mask.size}")
+                    try:
+                        pil_mask = tensor_to_pil_mask(mask_tensor)
+                        pil_masks.append(pil_mask)
+                        print(f"✅ Converted mask {i+1} to PIL mask: {pil_mask.size} mode: {pil_mask.mode}")
+                    except Exception as e:
+                        print(f"❌ Failed to convert mask {i+1}: {e}")
+                        pil_masks.append(None)
                 else:
                     pil_masks.append(None)
+                    print(f"ℹ️ No mask provided for layer {i+1}")
         else:
             pil_masks = [None] * len(pil_images)
+            print(f"ℹ️ No mask tensors provided - creating {len(pil_images)} empty mask slots")
         
         # Create layers using simplified approach
         layers = []
