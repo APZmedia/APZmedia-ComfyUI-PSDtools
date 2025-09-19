@@ -192,7 +192,7 @@ print(f"\n{Colors.ORANGE}{Colors.BOLD}--- Importing APZmediaPSDLayerSaverMultila
 try:
     # Ensure dependencies are available before importing
     if ensure_dependencies_for_nodes():
-        APZmediaPSDLayerSaverMultilayer = import_node_module("apzPSDLayerSaverRefactored", "APZmediaPSDLayerSaverMultilayer", nodes_path)
+        APZmediaPSDLayerSaverMultilayer = import_node_module("apzPSDLayerSaverMultilayer", "APZmediaPSDLayerSaverMultilayer", nodes_path)
         logger.info("Successfully imported APZmediaPSDLayerSaverMultilayer node.")
     else:
         print(f"{Colors.RED}❌ Dependencies not available for APZmediaPSDLayerSaverMultilayer node{Colors.END}")

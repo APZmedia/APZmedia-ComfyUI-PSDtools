@@ -27,13 +27,26 @@ try:
         process_layers_to_psd,
         check_psd_tools_available
     )
+    print("✅ Successfully imported PSD tools utility functions")
 except ImportError as e:
     print(f"Warning: Could not import PSD utilities: {e}")
-    # Create dummy functions to prevent errors
-    def process_layers_to_psd(*args, **kwargs):
-        raise ImportError("PSD utilities not available")
-    def check_psd_tools_available(*args, **kwargs):
-        raise ImportError("PSD utilities not available")
+    # Try alternative import method
+    try:
+        import importlib.util
+        utils_path = os.path.join(extension_root, "utils")
+        spec = importlib.util.spec_from_file_location("apz_psd_tools_utility", os.path.join(utils_path, "apz_psd_tools_utility.py"))
+        apz_psd_tools_utility = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(apz_psd_tools_utility)
+        process_layers_to_psd = apz_psd_tools_utility.process_layers_to_psd
+        check_psd_tools_available = apz_psd_tools_utility.check_psd_tools_available
+        print("✅ Successfully imported PSD tools utility functions (fallback method)")
+    except Exception as e2:
+        print(f"Warning: Fallback import also failed: {e2}")
+        # Create dummy functions to prevent errors
+        def process_layers_to_psd(*args, **kwargs):
+            raise ImportError("PSD utilities not available")
+        def check_psd_tools_available(*args, **kwargs):
+            raise ImportError("PSD utilities not available")
 
 
 class APZmediaPSDLayerSaverMultilayer:

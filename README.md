@@ -1,35 +1,31 @@
 # ComfyUI-APZmedia-PSDtools
 
-**ComfyUI-APZmedia-PSDtools** is a collection of custom nodes designed for use with ComfyUI. These nodes provide functionality for saving images as layers in PSD files with mask support, enabling seamless integration between ComfyUI workflows and Adobe Photoshop.
+**ComfyUI-APZmedia-PSDtools** is a streamlined collection of custom nodes designed for use with ComfyUI. These nodes provide functionality for saving and loading images as layers in PSD files with mask support, enabling seamless integration between ComfyUI workflows and Adobe Photoshop.
 
 ## Overview
 
-ComfyUI-APZmedia-PSDtools includes custom nodes for:
+ComfyUI-APZmedia-PSDtools includes two essential nodes:
 
-- **APZmedia PSD Layer Saver**: A node for saving multiple images as layers in a PSD file with optional masks
-- **APZmedia PSD Layer Saver Advanced**: An enhanced version with background layer support and advanced layer options
-- **APZmedia PSD Layer Saver (8 Layers)**: A specialized node for exactly 8 layers with individual inputs for each layer
-- **APZmedia PSD Layer Saver (8 Layers Advanced)**: Advanced version of the 8-layer node with offset support
+- **APZmedia PSD Multilayer Saver**: A flexible node for saving 1-10 images as layers in a PSD file with optional masks
+- **APZmedia PSD Layer Loader**: A node for loading PSD files and extracting specific layers with their masks
 
 ## Features
 
 ### Core Functionality
-- **Multi-Layer PSD Creation**: Save multiple images as separate layers in a single PSD file
+- **Flexible Multi-Layer PSD Creation**: Save 1-10 images as separate layers in a single PSD file
+- **Optional Layer Inputs**: All layers are optional - connect only what you need
 - **Mask Support**: Apply masks to individual layers for precise control
 - **Layer Naming**: Custom names for each layer
-- **Opacity Control**: Set individual opacity for each layer (0-255)
-- **Blend Modes**: Support for various blend modes (normal, multiply, screen, overlay, etc.)
-- **Color Mode Support**: RGB, CMYK, and Grayscale color modes
+- **PSD Loading**: Load existing PSD files and extract specific layers
+- **Layer Information**: Get layer names, counts, and metadata from PSD files
 
 ### Advanced Features
-- **Background Layer**: Optional background layer with custom color and opacity
-- **Layer Offsets**: Position layers with custom X,Y offsets
-- **Automatic Dimension Validation**: Ensures all layers have compatible dimensions
-- **Error Handling**: Comprehensive error handling with detailed feedback
-- **Batch Processing**: Process multiple images and masks in a single operation
+- **Smart Error Handling**: Clear error messages when no layers are provided
 - **Automatic Dependency Management**: Dependencies are installed automatically when needed
+- **Robust Import System**: Fallback import methods ensure nodes work in all environments
 - **Smart Installation**: Detects missing packages and installs them without user intervention
 - **Installation Feedback**: Clear console output showing installation progress and status
+- **Cross-Platform Compatibility**: Works on Windows, macOS, and Linux
 
 ## Installation
 
@@ -123,10 +119,8 @@ pip install --user Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
 ### Verify Installation
 
 After installation, you should see the PSD nodes in the `image/psd` category:
-- APZmedia PSD Layer Saver
-- APZmedia PSD Layer Saver Advanced  
-- APZmedia PSD Layer Saver (8 Layers)
-- APZmedia PSD Layer Saver (8 Layers Advanced)
+- **APZmedia PSD Multilayer Saver**: For saving multiple images as PSD layers
+- **APZmedia PSD Layer Loader**: For loading PSD files and extracting layers
 
 ### Troubleshooting
 
@@ -160,201 +154,93 @@ If nodes don't appear, check the ComfyUI console for error messages. See [INSTAL
 
 ## Node Reference
 
-### APZmedia PSD Layer Saver
+### APZmedia PSD Multilayer Saver
+
+**Category**: `image/psd`
+
+**Inputs** (All Optional):
+- **output_dir** (STRING, optional): Directory to save the PSD file (default: "./output")
+- **filename_prefix** (STRING, optional): Prefix for the filename (default: "output")
+- **layer1** through **layer10** (IMAGE, optional): Individual images for each layer
+- **mask1** through **mask10** (MASK, optional): Individual masks for each layer
+- **layer_name1** through **layer_name10** (STRING, optional): Individual layer names
+
+**Outputs**:
+- **None** (OUTPUT_NODE): This is an output node that writes to disk
+
+**Features**:
+- **Flexible Input**: Connect 1-10 layers as needed
+- **Optional Masks**: Each layer can have an optional mask
+- **Custom Names**: Each layer can have a custom name
+- **Error Handling**: Clear error message if no layers are provided
+- **Automatic File Naming**: Generates unique filenames to avoid overwrites
+
+### APZmedia PSD Layer Loader
 
 **Category**: `image/psd`
 
 **Inputs**:
-- **images** (IMAGE): Batch of images to save as layers
-- **layer_names** (STRING): Newline-separated list of layer names
-- **output_path** (STRING): Path where to save the PSD file
-- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
-- **masks** (MASK, optional): Batch of masks to apply to layers
-- **opacities** (STRING, optional): Newline-separated list of opacity values (0-255)
-- **blend_modes** (STRING, optional): Newline-separated list of blend mode names
-- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
+- **psd_file** (STRING): Path to the PSD file to load
+- **layer_index** (INT): Index of the layer to extract (0-based)
+- **load_mask** (COMBO, optional): Whether to load the mask ("true" or "false", default: "true")
+- **overwrite_mode** (COMBO, optional): Placeholder for consistency (default: "false")
 
 **Outputs**:
-- **output_path** (STRING): Path where the PSD file was saved
-- **success** (BOOLEAN): Whether the operation was successful
+- **image** (IMAGE): The extracted layer as a tensor
+- **mask** (MASK): The layer's mask as a tensor
+- **layer_name** (STRING): Name of the extracted layer
+- **layer_count** (INT): Total number of layers in the PSD file
 
-### APZmedia PSD Layer Saver Advanced
-
-**Category**: `image/psd`
-
-**Inputs**:
-- **images** (IMAGE): Batch of images to save as layers
-- **layer_names** (STRING): Newline-separated list of layer names
-- **output_path** (STRING): Path where to save the PSD file
-- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
-- **create_background_layer** (COMBO): Whether to create a background layer (true/false)
-- **masks** (MASK, optional): Batch of masks to apply to layers
-- **opacities** (STRING, optional): Newline-separated list of opacity values (0-255)
-- **blend_modes** (STRING, optional): Newline-separated list of blend mode names
-- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
-- **background_opacity** (INT, optional): Opacity for background layer (0-255)
-- **layer_offsets** (STRING, optional): Newline-separated list of "x,y" offsets
-
-**Outputs**:
-- **output_path** (STRING): Path where the PSD file was saved
-- **success** (BOOLEAN): Whether the operation was successful
-- **layer_count** (INT): Number of layers created in the PSD file
-
-### APZmedia PSD Layer Saver (8 Layers)
-
-**Category**: `image/psd`
-
-**Inputs**:
-- **image_1** through **image_8** (IMAGE): Individual images for each layer
-- **layer_name_1** through **layer_name_8** (STRING): Individual layer names
-- **psd_filename** (STRING): Name of the PSD file to create
-- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
-- **mask_1** through **mask_8** (MASK, optional): Individual masks for each layer
-- **opacity_1** through **opacity_8** (INT, optional): Individual opacity values (0-255)
-- **blend_mode_1** through **blend_mode_8** (COMBO, optional): Individual blend modes
-- **create_background_layer** (COMBO, optional): Whether to create a background layer (true/false)
-- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
-- **background_opacity** (INT, optional): Opacity for background layer (0-255)
-
-**Outputs**:
-- **output_path** (STRING): Path where the PSD file was saved
-- **success** (BOOLEAN): Whether the operation was successful
-- **layer_count** (INT): Number of layers created in the PSD file
-
-### APZmedia PSD Layer Saver (8 Layers Advanced)
-
-**Category**: `image/psd`
-
-**Inputs**:
-- **image_1** through **image_8** (IMAGE): Individual images for each layer
-- **layer_name_1** through **layer_name_8** (STRING): Individual layer names
-- **psd_filename** (STRING): Name of the PSD file to create
-- **color_mode** (COMBO): Color mode for the PSD file (rgb, cmyk, grayscale)
-- **create_background_layer** (COMBO): Whether to create a background layer (true/false)
-- **mask_1** through **mask_8** (MASK, optional): Individual masks for each layer
-- **opacity_1** through **opacity_8** (INT, optional): Individual opacity values (0-255)
-- **blend_mode_1** through **blend_mode_8** (COMBO, optional): Individual blend modes
-- **background_color** (STRING, optional): Hex color for background (default: #FFFFFF)
-- **background_opacity** (INT, optional): Opacity for background layer (0-255)
-- **offset_x_1** through **offset_x_8** (INT, optional): Individual X offsets for layers
-- **offset_y_1** through **offset_y_8** (INT, optional): Individual Y offsets for layers
-
-**Outputs**:
-- **output_path** (STRING): Path where the PSD file was saved
-- **success** (BOOLEAN): Whether the operation was successful
-- **layer_count** (INT): Number of layers created in the PSD file
+**Features**:
+- **Layer Selection**: Extract specific layers by index
+- **Mask Support**: Load layer masks when available
+- **Layer Information**: Get layer names and total count
+- **Error Handling**: Graceful handling of missing layers or files
 
 ## Usage Examples
 
-### Basic Usage
+### Basic Multilayer Saving
 
 1. **Load Images**: Use ComfyUI's image loading nodes to load your images
-2. **Connect to PSD Layer Saver**: Connect the images to the `images` input
-3. **Set Layer Names**: Enter layer names, one per line:
-   ```
-   Background
-   Foreground
-   Overlay
-   ```
-4. **Set Output Path**: Specify where to save the PSD file (e.g., `./output.psd`)
-5. **Run**: Execute the workflow to create the PSD file
-
-### Advanced Usage with Masks
-
-1. **Load Images and Masks**: Load both images and corresponding masks
-2. **Connect to Advanced Saver**: Use the Advanced node for more control
-3. **Configure Layer Properties**:
-   - Layer names: `Background\nCharacter\nEffects`
-   - Opacities: `255\n200\n150`
-   - Blend modes: `normal\nmultiply\noverlay`
-4. **Enable Background**: Set `create_background_layer` to `true`
-5. **Set Background Color**: Use hex color like `#FF0000` for red background
-
-### 8-Layer Node Usage
-
-The 8-layer nodes are perfect when you have exactly 8 images to save as layers:
-
-1. **Load 8 Images**: Use ComfyUI's image loading nodes to load your 8 images
-2. **Connect to 8-Layer Saver**: Connect each image to the corresponding `image_1` through `image_8` inputs
-3. **Set Layer Names**: Enter individual layer names:
-   - `layer_name_1`: "Background"
-   - `layer_name_2`: "Character"
-   - `layer_name_3`: "Hair"
-   - `layer_name_4`: "Clothing"
-   - `layer_name_5`: "Accessories"
-   - `layer_name_6`: "Effects"
-   - `layer_name_7`: "Lighting"
-   - `layer_name_8`: "Overlay"
-4. **Set PSD Filename**: Enter the desired filename (e.g., `character_composition.psd`)
-5. **Add Masks (Optional)**: Connect masks to `mask_1` through `mask_8` if needed
-6. **Configure Properties**: Set individual opacities and blend modes for each layer
+2. **Connect to Multilayer Saver**: Connect images to `layer1`, `layer2`, etc.
+3. **Set Layer Names**: Enter custom names for each layer:
+   - `layer_name1`: "Background"
+   - `layer_name2`: "Character"
+   - `layer_name3`: "Effects"
+4. **Add Masks (Optional)**: Connect masks to `mask1`, `mask2`, etc.
+5. **Set Output Directory**: Specify where to save (default: "./output")
+6. **Set Filename Prefix**: Enter a prefix for the filename (default: "output")
 7. **Run**: Execute the workflow to create the PSD file
 
-### Layer Names Format
+### Loading PSD Files
 
-Enter layer names separated by newlines:
-```
-Background Layer
-Character
-Hair
-Clothing
-Accessories
-```
+1. **Set PSD File Path**: Enter the path to your PSD file
+2. **Select Layer Index**: Choose which layer to extract (0-based index)
+3. **Load Mask**: Choose whether to load the layer's mask
+4. **Connect Outputs**: Use the extracted image and mask in your workflow
+5. **Get Layer Info**: Use the layer name and count for further processing
 
-### Opacity Values Format
+### Flexible Layer Usage
 
-Enter opacity values (0-255) separated by newlines:
-```
-255
-200
-150
-100
-50
-```
+The multilayer saver is designed to be flexible:
 
-### Blend Modes Format
+- **1 Layer**: Connect only `layer1` and `layer_name1`
+- **3 Layers**: Connect `layer1`, `layer2`, `layer3` with their names
+- **5 Layers**: Connect `layer1` through `layer5` as needed
+- **10 Layers**: Use all available layer inputs
 
-Enter blend mode names separated by newlines:
-```
-normal
-multiply
-screen
-overlay
-soft_light
-```
+**Error Handling**: If no layers are connected, you'll see: "No layers or masks are being saved"
 
-### Layer Offsets Format
+### Layer Names
 
-Enter X,Y coordinates separated by newlines:
-```
-0,0
-10,20
--5,15
-0,0
-```
+Enter custom names for each layer:
+- `layer_name1`: "Background"
+- `layer_name2`: "Character" 
+- `layer_name3`: "Effects"
+- `layer_name4`: "Lighting"
+- etc.
 
-## Supported Blend Modes
-
-- `normal` - Normal blending
-- `multiply` - Multiply blending
-- `screen` - Screen blending
-- `overlay` - Overlay blending
-- `soft_light` - Soft light blending
-- `hard_light` - Hard light blending
-- `color_dodge` - Color dodge blending
-- `color_burn` - Color burn blending
-- `darken` - Darken blending
-- `lighten` - Lighten blending
-- `difference` - Difference blending
-- `exclusion` - Exclusion blending
-
-## Color Modes
-
-- **RGB**: Standard RGB color mode (recommended for most use cases)
-- **CMYK**: CMYK color mode for print workflows
-- **Grayscale**: Grayscale color mode for monochrome images
-
-## Mask Handling
+### Mask Handling
 
 The nodes automatically handle various mask formats:
 - **Tensor Masks**: ComfyUI MASK input type
@@ -365,40 +251,48 @@ The nodes automatically handle various mask formats:
 ## Error Handling
 
 The nodes include comprehensive error handling:
-- **Dimension Validation**: Ensures all layers have compatible dimensions
+- **No Layers Error**: Clear message "No layers or masks are being saved" when no layers are provided
 - **File Path Validation**: Checks output directory and creates if needed
 - **Mask Processing**: Handles various mask formats gracefully
-- **Fallback Values**: Uses sensible defaults when optional inputs are missing
+- **Layer Index Validation**: Ensures layer index is within valid range
+- **Import Fallbacks**: Robust import system with multiple fallback methods
 
 ## Troubleshooting
 
 ### Common Issues
+
+#### "No layers or masks are being saved"
+- **Connect Layers**: Make sure at least one layer input is connected
+- **Check Connections**: Verify that images are properly connected to layer inputs
 
 #### "Failed to save PSD file"
 - **Check Output Path**: Ensure the output directory exists and is writable
 - **Check Permissions**: Verify write permissions for the output location
 - **Check Disk Space**: Ensure sufficient disk space for the PSD file
 
-#### "Layer dimensions don't match"
-- **Resize Images**: Use ComfyUI's resize nodes to make all images the same size
-- **Check Image Formats**: Ensure all images have the same dimensions
+#### "Layer index out of range"
+- **Check Layer Count**: Verify the layer index is within the valid range (0 to layer_count-1)
+- **Use Layer Count Output**: The loader provides the total layer count for reference
 
-#### "Mask processing error"
-- **Check Mask Format**: Ensure masks are in the correct format (grayscale)
-- **Check Mask Dimensions**: Masks should match image dimensions
+#### "PSD loader utilities not available"
+- **Check Dependencies**: Ensure psd-tools is properly installed
+- **Restart ComfyUI**: Sometimes a restart helps with dependency loading
 
 ### Console Output
 
 The nodes provide detailed console output for debugging:
 ```
-APZmediaPSDLayerSaver initialized
-Successfully saved PSD file with 3 layers to: ./output.psd
+APZmediaPSDLayerSaverMultilayer initialized
+✅ Successfully imported PSD tools utility functions
+Processing 3 layers for PSD creation
+Successfully saved PSD file with 3 layers to: ./output/output_001.psd
 ```
 
 ## Technical Details
 
 ### Dependencies
 - **pytoshop**: Core PSD file creation library
+- **psd-tools**: PSD file reading and processing
 - **Pillow**: Image processing and format support
 - **torch**: Tensor operations and ComfyUI integration
 - **numpy**: Numerical operations and array handling
@@ -424,10 +318,13 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Changelog
 
 ### Version 0.2.1
-- **NEW: Automatic Dependency Installation**: Dependencies are now installed automatically when the extension loads
-- **Smart Installation**: Detects missing packages and installs them without user intervention
-- **Installation Feedback**: Clear console output showing installation progress and status
-- **Fallback Support**: Manual installation scripts still available as backup
+- **NEW: Simplified Extension**: Streamlined to only include essential nodes
+- **APZmedia PSD Multilayer Saver**: Flexible node for saving 1-10 layers with optional inputs
+- **APZmedia PSD Layer Loader**: Node for loading PSD files and extracting layers
+- **Optional Layer Inputs**: All layer inputs are optional for maximum flexibility
+- **Smart Error Handling**: Clear error message when no layers are provided
+- **Robust Import System**: Fallback import methods ensure nodes work in all environments
+- **Automatic Dependency Installation**: Dependencies are installed automatically when the extension loads
 - **Enhanced Error Handling**: Better error messages and troubleshooting guidance
 
 ### Version 0.2.0
