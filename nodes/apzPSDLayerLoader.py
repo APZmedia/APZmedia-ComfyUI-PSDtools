@@ -60,7 +60,7 @@ class APZmediaPSDLayerLoader:
         return {
             "required": {
                 "psd_file": ("STRING", {
-                    "default": "./input.psd"
+                    "default": "./example/Example.psd"
                 }),
                 "layer_index": ("INT", {
                     "default": 0,
