@@ -27,23 +27,41 @@ try:
         list_psd_layers,
         check_psd_tools_available
     )
+    print("✅ Successfully imported PSD loader utility functions")
 except ImportError as e:
     print(f"Warning: Could not import PSD loader utilities: {e}")
-    # Create dummy functions to prevent errors
-    def load_psd_file(*args, **kwargs):
-        raise ImportError("PSD loader utilities not available")
-    def get_psd_info(*args, **kwargs):
-        raise ImportError("PSD loader utilities not available")
-    def extract_layer_and_mask(*args, **kwargs):
-        raise ImportError("PSD loader utilities not available")
-    def pil_to_tensor(*args, **kwargs):
-        raise ImportError("PSD loader utilities not available")
-    def pil_mask_to_tensor(*args, **kwargs):
-        raise ImportError("PSD loader utilities not available")
-    def list_psd_layers(*args, **kwargs):
-        raise ImportError("PSD loader utilities not available")
-    def check_psd_tools_available(*args, **kwargs):
-        raise ImportError("PSD loader utilities not available")
+    # Try alternative import method
+    try:
+        import importlib.util
+        utils_path = os.path.join(extension_root, "utils")
+        spec = importlib.util.spec_from_file_location("apz_psd_loader_utility", os.path.join(utils_path, "apz_psd_loader_utility.py"))
+        apz_psd_loader_utility = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(apz_psd_loader_utility)
+        load_psd_file = apz_psd_loader_utility.load_psd_file
+        get_psd_info = apz_psd_loader_utility.get_psd_info
+        extract_layer_and_mask = apz_psd_loader_utility.extract_layer_and_mask
+        pil_to_tensor = apz_psd_loader_utility.pil_to_tensor
+        pil_mask_to_tensor = apz_psd_loader_utility.pil_mask_to_tensor
+        list_psd_layers = apz_psd_loader_utility.list_psd_layers
+        check_psd_tools_available = apz_psd_loader_utility.check_psd_tools_available
+        print("✅ Successfully imported PSD loader utility functions (fallback method)")
+    except Exception as e2:
+        print(f"Warning: Fallback import also failed: {e2}")
+        # Create dummy functions to prevent errors
+        def load_psd_file(*args, **kwargs):
+            raise ImportError("PSD loader utilities not available")
+        def get_psd_info(*args, **kwargs):
+            raise ImportError("PSD loader utilities not available")
+        def extract_layer_and_mask(*args, **kwargs):
+            raise ImportError("PSD loader utilities not available")
+        def pil_to_tensor(*args, **kwargs):
+            raise ImportError("PSD loader utilities not available")
+        def pil_mask_to_tensor(*args, **kwargs):
+            raise ImportError("PSD loader utilities not available")
+        def list_psd_layers(*args, **kwargs):
+            raise ImportError("PSD loader utilities not available")
+        def check_psd_tools_available(*args, **kwargs):
+            raise ImportError("PSD loader utilities not available")
 
 
 class APZmediaPSDLayerLoader:

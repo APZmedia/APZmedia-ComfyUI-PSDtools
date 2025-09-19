@@ -100,11 +100,26 @@ def pil_to_tensor(pil_image: Image.Image) -> torch.Tensor:
     if pil_image.mode != 'RGB':
         pil_image = pil_image.convert('RGB')
     
-    # Convert to numpy array
-    img_array = np.array(pil_image, dtype=np.float32) / 255.0
+    # Get image dimensions
+    width, height = pil_image.size
     
-    # Convert to tensor and add batch dimension
-    tensor = torch.from_numpy(img_array).unsqueeze(0)
+    # Convert to tensor directly without numpy
+    try:
+        # Try using torch.from_numpy if numpy is available
+        img_array = np.array(pil_image, dtype=np.float32) / 255.0
+        tensor = torch.from_numpy(img_array).unsqueeze(0)
+    except (ImportError, RuntimeError):
+        # Fallback: convert pixel by pixel
+        pixels = list(pil_image.getdata())
+        img_data = []
+        for pixel in pixels:
+            if len(pixel) == 3:  # RGB
+                img_data.append([pixel[0]/255.0, pixel[1]/255.0, pixel[2]/255.0])
+            else:  # Handle other modes
+                img_data.append([pixel[0]/255.0, pixel[0]/255.0, pixel[0]/255.0])
+        
+        # Convert to tensor
+        tensor = torch.tensor(img_data, dtype=torch.float32).view(height, width, 3).unsqueeze(0)
     
     return tensor
 
@@ -123,11 +138,21 @@ def pil_mask_to_tensor(pil_mask: Image.Image) -> torch.Tensor:
     if pil_mask.mode != 'L':
         pil_mask = pil_mask.convert('L')
     
-    # Convert to numpy array
-    mask_array = np.array(pil_mask, dtype=np.float32) / 255.0
+    # Get image dimensions
+    width, height = pil_mask.size
     
-    # Convert to tensor and add batch dimension
-    tensor = torch.from_numpy(mask_array).unsqueeze(0)
+    # Convert to tensor directly without numpy
+    try:
+        # Try using torch.from_numpy if numpy is available
+        mask_array = np.array(pil_mask, dtype=np.float32) / 255.0
+        tensor = torch.from_numpy(mask_array).unsqueeze(0)
+    except (ImportError, RuntimeError):
+        # Fallback: convert pixel by pixel
+        pixels = list(pil_mask.getdata())
+        mask_data = [pixel/255.0 for pixel in pixels]
+        
+        # Convert to tensor
+        tensor = torch.tensor(mask_data, dtype=torch.float32).view(height, width).unsqueeze(0)
     
     return tensor
 
