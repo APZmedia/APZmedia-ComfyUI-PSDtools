@@ -17,9 +17,8 @@ class DependencyInstaller:
     
     def __init__(self):
         self.required_packages = [
-            ("pytoshop", "pytoshop>=0.1.0", "-I --no-cache-dir --user"),
-            ("psd-tools", "psd-tools", "--no-deps --user"),
-            ("Pillow", "Pillow>=8.0.0", "--user"),
+            ("psd_tools", "psd-tools>=1.9.0", "--user"),
+            ("PIL", "Pillow>=8.0.0", "--user"),
             ("torch", "torch>=1.7.0", "--user"),
             ("numpy", "numpy>=1.19.0", "--user")
         ]

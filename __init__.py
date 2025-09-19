@@ -101,37 +101,37 @@ if AUTO_INSTALLER_AVAILABLE:
 else:
     print(f"{Colors.YELLOW}⚠️ Auto-installer not available, checking dependencies manually...{Colors.END}")
 
-# Check if pytoshop is available (fallback check)
+# Check if psd-tools is available (fallback check)
 try:
-    import pytoshop
-    print(f"{Colors.GREEN}✅ pytoshop is available{Colors.END}")
+    import psd_tools
+    print(f"{Colors.GREEN}✅ psd-tools is available{Colors.END}")
 except ImportError as e:
-    print(f"{Colors.RED}❌ pytoshop not available: {e}{Colors.END}")
+    print(f"{Colors.RED}❌ psd-tools not available: {e}{Colors.END}")
     print(f"{Colors.RED}   This will cause node import failures!{Colors.END}")
     if AUTO_INSTALLER_AVAILABLE:
-        print(f"{Colors.YELLOW}   Attempting to install pytoshop...{Colors.END}")
+        print(f"{Colors.YELLOW}   Attempting to install psd-tools...{Colors.END}")
         try:
             from auto_installer import get_installer
             installer = get_installer()
-            success = installer.install_package("pytoshop", "pytoshop>=0.1.0", "-I --no-cache-dir")
+            success = installer.install_package("psd_tools", "psd-tools>=1.9.0", "--user")
             if success:
-                print(f"{Colors.GREEN}✅ pytoshop installed successfully!{Colors.END}")
+                print(f"{Colors.GREEN}✅ psd-tools installed successfully!{Colors.END}")
             else:
-                print(f"{Colors.RED}❌ Failed to install pytoshop{Colors.END}")
+                print(f"{Colors.RED}❌ Failed to install psd-tools{Colors.END}")
         except Exception as install_error:
-            print(f"{Colors.RED}❌ Error installing pytoshop: {install_error}{Colors.END}")
+            print(f"{Colors.RED}❌ Error installing psd-tools: {install_error}{Colors.END}")
 
 # Function to ensure dependencies before node import
 def ensure_dependencies_for_nodes():
     """Ensure all dependencies are available before importing nodes"""
-    # Simplified dependency check - just check if pytoshop is available
-    # This is the main dependency needed for PSD saving
+    # Simplified dependency check - just check if psd-tools is available
+    # This is the main dependency needed for PSD operations
     try:
-        import pytoshop
-        print(f"{Colors.GREEN}✅ pytoshop is available for PSD operations{Colors.END}")
+        import psd_tools
+        print(f"{Colors.GREEN}✅ psd-tools is available for PSD operations{Colors.END}")
         return True
     except ImportError:
-        print(f"{Colors.RED}❌ pytoshop not available - PSD nodes cannot work{Colors.END}")
+        print(f"{Colors.RED}❌ psd-tools not available - PSD nodes cannot work{Colors.END}")
         return False
 
 # Function to import node modules with multiple fallback methods

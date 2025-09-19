@@ -16,8 +16,6 @@ try:
     from psd_tools import PSDImage
     from psd_tools.api.layers import PixelLayer
     from psd_tools.constants import ColorMode, ChannelID
-    from psd_tools.psd.layer_and_mask import MaskData, ChannelInfo, ChannelData, MaskFlags
-    from psd_tools.constants import Compression
     PSD_TOOLS_AVAILABLE = True
 except ImportError:
     PSD_TOOLS_AVAILABLE = False
@@ -25,11 +23,6 @@ except ImportError:
     PixelLayer = None
     ColorMode = None
     ChannelID = None
-    ChannelData = None
-    ChannelInfo = None
-    MaskData = None
-    MaskFlags = None
-    Compression = None
 
 
 def check_psd_tools_available():
@@ -154,58 +147,74 @@ def calculate_canvas_size(images: List[Image.Image]) -> Tuple[int, int]:
     return max_width, max_height
 
 
-def center_and_pad_image(image: Image.Image, canvas_width: int, canvas_height: int, 
-                        background_color: Tuple[int, int, int] = (0, 0, 0)) -> Image.Image:
+def resize_image_to_canvas(image: Image.Image, canvas_width: int, canvas_height: int) -> Image.Image:
     """
-    Centers an image on a canvas and pads it with background color.
+    Resizes an image to fit the canvas size while maintaining aspect ratio.
+    Centers the image and pads with transparent pixels.
     
     Args:
-        image: PIL Image to center
+        image: PIL Image to resize
         canvas_width: Width of the canvas
         canvas_height: Height of the canvas
-        background_color: RGB color for padding
         
     Returns:
-        PIL Image centered on canvas
+        PIL Image resized and centered on canvas with transparency
     """
-    # Create a new image with the canvas size and background color
-    canvas = Image.new('RGB', (canvas_width, canvas_height), background_color)
+    # Convert to RGBA to support transparency
+    if image.mode != 'RGBA':
+        image = image.convert('RGBA')
+    
+    # Create a transparent canvas
+    canvas = Image.new('RGBA', (canvas_width, canvas_height), (0, 0, 0, 0))
     
     # Calculate position to center the image
     x = (canvas_width - image.width) // 2
     y = (canvas_height - image.height) // 2
     
     # Paste the image onto the canvas
-    canvas.paste(image, (x, y))
+    canvas.paste(image, (x, y), image)
     
     return canvas
 
 
-def resize_and_center_mask(mask: Image.Image, target_width: int, target_height: int) -> Image.Image:
+def apply_mask_to_image(image: Image.Image, mask: Image.Image) -> Image.Image:
     """
-    Resizes a mask to match the target image size and centers it.
+    Applies a mask to an image using PIL compositing.
+    This is simpler and more reliable than manual PSD mask creation.
     
     Args:
+        image: PIL Image in RGBA mode
         mask: PIL Image mask in L mode
-        target_width: Target width
-        target_height: Target height
         
     Returns:
-        PIL Image mask resized and centered
+        PIL Image with mask applied
     """
-    # Resize mask to match the target image size using LANCZOS resampling
-    resized_mask = mask.resize((target_width, target_height), Image.LANCZOS)
+    # Ensure image is RGBA
+    if image.mode != 'RGBA':
+        image = image.convert('RGBA')
     
-    return resized_mask
+    # Ensure mask is L mode and same size as image
+    if mask.mode != 'L':
+        mask = mask.convert('L')
+    
+    if mask.size != image.size:
+        mask = mask.resize(image.size, Image.LANCZOS)
+    
+    # Apply mask by replacing the alpha channel
+    r, g, b, a = image.split()
+    image_with_mask = Image.merge('RGBA', (r, g, b, mask))
+    
+    return image_with_mask
 
 
-def create_psd_layer_with_mask(pil_image: Image.Image, layer_name: str, 
-                              pil_mask: Optional[Image.Image] = None) -> PixelLayer:
+def create_simple_psd_layer(pil_image: Image.Image, layer_name: str, 
+                           pil_mask: Optional[Image.Image] = None) -> PixelLayer:
     """
-    Creates a PSD layer from a PIL image with optional mask.
+    Creates a PSD layer from a PIL image with optional mask using simple approach.
+    Instead of complex manual mask creation, we composite the mask into the image.
     
     Args:
-        pil_image: PIL Image in RGB mode
+        pil_image: PIL Image in RGB or RGBA mode
         layer_name: Name for the layer
         pil_mask: Optional PIL Image mask in L mode
         
@@ -214,53 +223,29 @@ def create_psd_layer_with_mask(pil_image: Image.Image, layer_name: str,
     """
     check_psd_tools_available()
     
+    # If mask is provided, apply it to the image
+    if pil_mask is not None:
+        # Apply mask to image using PIL compositing
+        pil_image = apply_mask_to_image(pil_image, pil_mask)
+        print(f"✅ Applied mask to layer '{layer_name}'")
+    else:
+        # Ensure image has alpha channel for consistency
+        if pil_image.mode != 'RGBA':
+            pil_image = pil_image.convert('RGBA')
+    
     # Create a temporary PSD to get the layer
     temp_psd = PSDImage.new(mode='RGB', size=pil_image.size, color=(0, 0, 0))
     
-    # Create the layer from the PIL image
+    # Create the layer from the PIL image (psd-tools handles the conversion)
     layer = PixelLayer.frompil(pil_image, temp_psd, layer_name)
-    
-    # Add mask if provided
-    if pil_mask is not None:
-        # Convert mask to numpy array
-        mask_data = np.array(pil_mask)
-        
-        # Create mask data structure
-        mask_channel_data = ChannelData(
-            compression=Compression.RAW,
-            data=mask_data.tobytes()
-        )
-        
-        # Create channel info for user layer mask
-        channel_info = ChannelInfo(
-            id=ChannelID.USER_LAYER_MASK,
-            length=len(mask_data.tobytes())
-        )
-        
-        # Add mask to layer
-        layer._channels[ChannelID.USER_LAYER_MASK] = mask_channel_data
-        layer._record.channel_count = len(layer._channels)
-        
-        # Create proper mask data structure using MaskData
-        mask_data_obj = MaskData(
-            top=0,
-            left=0,
-            bottom=pil_mask.height,
-            right=pil_mask.width,
-            background_color=0,
-            flags=MaskFlags(0)
-        )
-        
-        # Update layer record with mask info
-        layer._record.mask_data = mask_data_obj
     
     return layer
 
 
 def create_psd_from_layers(layers: List[PixelLayer], canvas_width: int, canvas_height: int,
-                          background_color: Tuple[int, int, int] = (0, 0, 0)) -> PSDImage:
+                          background_color: Tuple[int, int, int] = (255, 255, 255)) -> PSDImage:
     """
-    Creates a PSD file from a list of layers.
+    Creates a PSD file from a list of layers using simple approach.
     
     Args:
         layers: List of psd_tools PixelLayer objects
@@ -276,8 +261,8 @@ def create_psd_from_layers(layers: List[PixelLayer], canvas_width: int, canvas_h
     # Create new PSD document
     psd = PSDImage.new(mode='RGB', size=(canvas_width, canvas_height), color=background_color)
     
-    # Add layers to PSD
-    for layer in layers:
+    # Add layers to PSD (in reverse order since PSD layers are bottom-to-top)
+    for layer in reversed(layers):
         psd.append(layer)
     
     return psd
@@ -318,12 +303,12 @@ def generate_unique_filename(base_path: str, output_dir: str = ".") -> str:
     name, ext = os.path.splitext(filename)
     
     # Start with the original filename
-    counter = 0
+    counter = 1
     while True:
-        if counter == 0:
+        if counter == 1:
             unique_filename = filename
         else:
-            unique_filename = f"{name}_{counter}{ext}"
+            unique_filename = f"{name}_{counter:03d}{ext}"
         
         full_path = os.path.join(output_dir, unique_filename)
         
@@ -339,7 +324,7 @@ def process_layers_to_psd(image_tensors: List[torch.Tensor],
                          output_dir: str = ".",
                          filename_prefix: str = "output") -> Tuple[str, bool]:
     """
-    Processes a list of image tensors and creates a PSD file.
+    Processes a list of image tensors and creates a PSD file using simplified approach.
     
     Args:
         image_tensors: List of PyTorch tensors with images
@@ -354,14 +339,18 @@ def process_layers_to_psd(image_tensors: List[torch.Tensor],
     try:
         check_psd_tools_available()
         
+        print(f"🔄 Processing {len(image_tensors)} layers for PSD creation...")
+        
         # Convert tensors to PIL images
         pil_images = []
-        for tensor in image_tensors:
+        for i, tensor in enumerate(image_tensors):
             pil_image = tensor_to_pil_image(tensor)
             pil_images.append(pil_image)
+            print(f"✅ Converted tensor {i+1} to PIL image: {pil_image.size}")
         
         # Calculate canvas size
         canvas_width, canvas_height = calculate_canvas_size(pil_images)
+        print(f"📐 Canvas size: {canvas_width}x{canvas_height}")
         
         # Process masks if provided
         pil_masks = []
@@ -369,32 +358,31 @@ def process_layers_to_psd(image_tensors: List[torch.Tensor],
             for i, mask_tensor in enumerate(mask_tensors):
                 if mask_tensor is not None:
                     pil_mask = tensor_to_pil_mask(mask_tensor)
-                    # Resize mask to match the corresponding image
-                    pil_mask = resize_and_center_mask(pil_mask, pil_images[i].width, pil_images[i].height)
                     pil_masks.append(pil_mask)
+                    print(f"✅ Converted mask {i+1} to PIL mask: {pil_mask.size}")
                 else:
                     pil_masks.append(None)
         else:
             pil_masks = [None] * len(pil_images)
         
-        # Create layers
+        # Create layers using simplified approach
         layers = []
         for i, (pil_image, layer_name) in enumerate(zip(pil_images, layer_names)):
-            # Center and pad the image to canvas size
-            centered_image = center_and_pad_image(pil_image, canvas_width, canvas_height)
+            print(f"🎨 Creating layer {i+1}: '{layer_name}'")
+            
+            # Resize image to canvas size
+            resized_image = resize_image_to_canvas(pil_image, canvas_width, canvas_height)
             
             # Get corresponding mask
             pil_mask = pil_masks[i] if i < len(pil_masks) else None
             
-            # Resize and center mask if it exists
-            if pil_mask is not None:
-                pil_mask = resize_and_center_mask(pil_mask, canvas_width, canvas_height)
-            
-            # Create PSD layer
-            layer = create_psd_layer_with_mask(centered_image, layer_name, pil_mask)
+            # Create PSD layer with simplified approach
+            layer = create_simple_psd_layer(resized_image, layer_name, pil_mask)
             layers.append(layer)
+            print(f"✅ Created layer '{layer_name}' successfully")
         
         # Create PSD file
+        print("📄 Creating PSD document...")
         psd = create_psd_from_layers(layers, canvas_width, canvas_height)
         
         # Generate unique filename
@@ -405,12 +393,18 @@ def process_layers_to_psd(image_tensors: List[torch.Tensor],
         os.makedirs(output_dir, exist_ok=True)
         
         # Save PSD file
+        print(f"💾 Saving PSD file to: {output_path}")
         success = save_psd_file(psd, output_path)
+        
+        if success:
+            print(f"🎉 Successfully created PSD file with {len(layers)} layers!")
+        else:
+            print("❌ Failed to save PSD file")
         
         return output_path, success
         
     except Exception as e:
-        print(f"Error in process_layers_to_psd: {e}")
+        print(f"❌ Error in process_layers_to_psd: {e}")
         import traceback
         traceback.print_exc()
         return "", False

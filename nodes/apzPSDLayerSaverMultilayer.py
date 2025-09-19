@@ -69,6 +69,7 @@ class APZmediaPSDLayerSaverMultilayer:
                 "filename_prefix": ("STRING", {
                     "default": "output"
                 }),
+                "overwrite_mode": (["false", "true"], {"default": "false"}),
                 # Layer 1
                 "layer1": ("IMAGE",),
                 "mask1": ("MASK",),
@@ -130,6 +131,7 @@ class APZmediaPSDLayerSaverMultilayer:
     def save_psd_layers(self, 
                        output_dir=None,
                        filename_prefix=None,
+                       overwrite_mode="false",
                        # Layer inputs
                        layer1=None, mask1=None, layer_name1=None,
                        layer2=None, mask2=None, layer_name2=None,
@@ -193,6 +195,10 @@ class APZmediaPSDLayerSaverMultilayer:
                 return
             
             print(f"Processing {len(valid_layers)} layers for PSD creation")
+            print(f"Overwrite mode: {overwrite_mode}")
+            
+            # Handle overwrite mode
+            final_output_path = self._handle_overwrite_mode(output_dir, filename_prefix, overwrite_mode)
             
             # Process layers to PSD
             output_path, success = process_layers_to_psd(
@@ -212,6 +218,65 @@ class APZmediaPSDLayerSaverMultilayer:
             print(f"Error in save_psd_layers: {e}")
             import traceback
             traceback.print_exc()
+
+    def _handle_overwrite_mode(self, output_dir: str, filename_prefix: str, overwrite_mode: str) -> str:
+        """
+        Handle overwrite mode for file saving.
+        
+        Args:
+            output_dir: Directory to save the file
+            filename_prefix: Prefix for the filename
+            overwrite_mode: Whether to overwrite existing files ("true" or "false")
+            
+        Returns:
+            Final output path for the file
+        """
+        import os
+        from datetime import datetime
+        
+        # Create output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Generate base filename
+        base_filename = f"{filename_prefix}.psd"
+        base_path = os.path.join(output_dir, base_filename)
+        
+        # If overwrite is enabled, use the base path
+        if overwrite_mode == "true":
+            print(f"📁 Overwrite mode enabled - will overwrite existing files")
+            return base_path
+        
+        # If file doesn't exist, use base path
+        if not os.path.exists(base_path):
+            print(f"📁 File doesn't exist - using base path: {base_path}")
+            return base_path
+        
+        # File exists and overwrite is disabled - generate unique filename
+        print(f"📁 File exists and overwrite disabled - generating unique filename")
+        
+        # Try with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamped_filename = f"{filename_prefix}_{timestamp}.psd"
+        timestamped_path = os.path.join(output_dir, timestamped_filename)
+        
+        if not os.path.exists(timestamped_path):
+            print(f"📁 Using timestamped filename: {timestamped_path}")
+            return timestamped_path
+        
+        # If timestamped file also exists, try with counter
+        counter = 1
+        while True:
+            numbered_filename = f"{filename_prefix}_{counter:03d}.psd"
+            numbered_path = os.path.join(output_dir, numbered_filename)
+            
+            if not os.path.exists(numbered_path):
+                print(f"📁 Using numbered filename: {numbered_path}")
+                return numbered_path
+            
+            counter += 1
+            if counter > 999:  # Safety limit
+                print(f"⚠️ Could not generate unique filename after 999 attempts")
+                return base_path
 
 
 # Node class mappings for ComfyUI

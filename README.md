@@ -44,15 +44,28 @@ The extension now includes automatic dependency installation that runs when Comf
 
 The extension will automatically:
 - ✅ Check for missing dependencies
-- ✅ Install pytoshop with proper flags (`-I --no-cache-dir`)
-- ✅ Install psd-tools with no dependencies (`--no-deps`)
+- ✅ Install psd-tools for PSD file operations
 - ✅ Install other required packages (Pillow, torch, numpy)
 - ✅ Provide clear feedback on installation progress
 - ✅ Verify all dependencies are working
 
+--- Automatic Dependency Installation ---
+[INFO] Checking and installing dependencies automatically...
+[INFO] Installing pytoshop>=0.1.0...
+[SUCCESS] Successfully installed pytoshop>=0.1.0
+[SUCCESS] 🎉 All dependencies are ready!
+✅ Automatic dependency installation is enabled
+```
 **What you'll see in the console:**
 ```
 APZmedia PSD Tools Extension - Starting Load Process
+--- Automatic Dependency Installation ---
+[INFO] Checking and installing dependencies automatically...
+[INFO] Installing psd-tools>=1.9.0...
+[SUCCESS] Successfully installed psd-tools>=1.9.0
+[SUCCESS] 🎉 All dependencies are ready!
+✅ Automatic dependency installation is enabled
+```
 ============================================================
 --- Automatic Dependency Installation ---
 [INFO] Checking and installing dependencies automatically...
@@ -75,8 +88,7 @@ If automatic installation fails, you can still install dependencies manually:
 2. **Restart ComfyUI**
 
 The manual installation script will:
-- Install pytoshop with proper flags (`-I --no-cache-dir`)
-- Install psd-tools with no dependencies (`--no-deps`)
+- Install psd-tools for PSD file operations
 - Install other required packages (Pillow, torch, numpy)
 - Provide clear feedback on success/failure
 
@@ -102,17 +114,15 @@ If the above doesn't work, try installing from the ComfyUI root directory:
 
 If the automatic dependency installation doesn't work, you can install dependencies manually:
 
-**Standard installation (based on ComfyUI-Layers approach):**
+**Standard installation:**
 ```bash
-pip install pytoshop -I --no-cache-dir
-pip install psd-tools --no-deps
+pip install psd-tools>=1.9.0
 pip install Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
 ```
 
 **If you encounter permission issues, use the --user flag:**
 ```bash
-pip install --user pytoshop -I --no-cache-dir
-pip install --user psd-tools --no-deps
+pip install --user psd-tools>=1.9.0
 pip install --user Pillow>=8.0.0 torch>=1.7.0 numpy>=1.19.0
 ```
 
@@ -291,8 +301,7 @@ Successfully saved PSD file with 3 layers to: ./output/output_001.psd
 ## Technical Details
 
 ### Dependencies
-- **pytoshop**: Core PSD file creation library
-- **psd-tools**: PSD file reading and processing
+- **psd-tools**: Primary library for PSD file operations (reading and writing)
 - **Pillow**: Image processing and format support
 - **torch**: Tensor operations and ComfyUI integration
 - **numpy**: Numerical operations and array handling
@@ -343,7 +352,6 @@ For support, please open an issue on the GitHub repository or contact the mainta
 
 ## Acknowledgments
 
-- **pytoshop**: For providing the PSD file creation capabilities
+- **psd-tools**: For providing the PSD file creation and reading capabilities
 - **ComfyUI Community**: For the excellent framework and ecosystem
 - **Adobe**: For the PSD file format specification
-
